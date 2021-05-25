@@ -1,22 +1,23 @@
-import React from 'react'
-import Container from '@material-ui/core/Container';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import Typography from '@material-ui/core/Typography'
-import Divider from '@material-ui/core/Divider'
-import AppBar from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar'
-import Grid from '@material-ui/core/Grid'
-import Box from '@material-ui/core/Box'
-import Link from '@material-ui/core/Link'
-import Breadcrumbs from '@material-ui/core/Breadcrumbs'
-import CircularProgress from '@material-ui/core/CircularProgress';
-import useSWR from 'swr';
+import React from "react";
+import Container from "@material-ui/core/Container";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Typography from "@material-ui/core/Typography";
+import Divider from "@material-ui/core/Divider";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import Grid from "@material-ui/core/Grid";
+import Box from "@material-ui/core/Box";
+import Link from "@material-ui/core/Link";
+import Breadcrumbs from "@material-ui/core/Breadcrumbs";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import useSWR from "swr";
 
-const fetcher = url => fetch(url).then(r => r.json());
+const fetcher = (url) => fetch(url).then((r) => r.json());
 
 export default function Courses() {
-  const { data, error } = useSWR('api/courses', fetcher);
+  // eslint-disable-next-line no-unused-vars
+  const { data, error } = useSWR("api/courses", fetcher);
 
   let courseList;
   if (!data) {
@@ -34,30 +35,24 @@ export default function Courses() {
         <ListItem>
           <Grid container spacing={1}>
             <Grid item xs={12}>
-              <Typography variant="h6">
-                {course.name}
-              </Typography>
+              <Typography variant="h6">{course.name}</Typography>
             </Grid>
             <Grid item xs={12}>
               <Box display="inline-block" width="20%">
-                <Link href={`/homework/${course.id}`}>
-                  Homework
-                </Link>
+                <Link href={`/homework/${course.id}`}>Homework</Link>
               </Box>
               <Box display="inline-block" width="20%">
-                <Link href={`/discussion/${course.id}`}>
-                  Discussion
-                </Link>
+                <Link href={`/discussion/${course.id}`}>Discussion</Link>
               </Box>
             </Grid>
           </Grid>
         </ListItem>
-        <Divider/>
+        <Divider />
       </React.Fragment>
     ));
     courseList = (
       <List>
-        <Divider/>
+        <Divider />
         {courseItems}
       </List>
     );
@@ -85,12 +80,17 @@ export default function Courses() {
         <Box mx="10px" px="10px" pt="10px" mt="10px">
           <Breadcrumbs separator=">" aria-label="breadcrumb">
             <Typography> </Typography>
-            <Typography color="textPrimary">
-              Course List
-            </Typography>
+            <Typography color="textPrimary">Course List</Typography>
           </Breadcrumbs>
         </Box>
-        <Box border={1} borderRadius="borderRadius" borderColor="grey.500" m="10px" p="10px" minHeight="500px">
+        <Box
+          border={1}
+          borderRadius="borderRadius"
+          borderColor="grey.500"
+          m="10px"
+          p="10px"
+          minHeight="500px"
+        >
           {courseList}
         </Box>
       </Container>

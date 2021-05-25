@@ -1,16 +1,16 @@
-import { pool } from './common';
-import { sql } from 'slonik';
+import { pool } from "./common";
+import { sql } from "slonik";
 
 export async function getCourseList() {
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(sql`SELECT * FROM courses`);
     return data;
   });
-  return result['rows'];
+  return result.rows;
 }
 
 export async function getCourseName(cid) {
-  if (typeof cid != 'number') {
+  if (typeof cid !== "number") {
     return null;
   }
   if (isNaN(cid)) {
@@ -24,10 +24,10 @@ export async function getCourseName(cid) {
     return data;
   });
 
-  const rows = result['rows'];
-  if (rows.length == 0) {
+  const rows = result.rows;
+  if (rows.length === 0) {
     return null;
   }
 
-  return rows[0]['name'];
+  return rows[0].name;
 }
