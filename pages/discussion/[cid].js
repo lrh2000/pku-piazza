@@ -7,7 +7,33 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs'
 import Link from '@material-ui/core/Link'
 import Box from '@material-ui/core/Box'
 
-export default function Discussion() {
+import { getCourseName } from '../../src/db/courses.js'
+
+export function getStaticPaths() {
+  return {
+    paths: [],
+    fallback: 'blocking',
+  };
+}
+
+export async function getStaticProps(context) {
+  const id = Number.parseInt(context.params.cid);
+  const name = await getCourseName(id);
+  if (!name) {
+    return {
+      notFound: true,
+    };
+  }
+
+  return {
+    props: {
+      courseId: id,
+      courseName: name,
+    },
+  };
+}
+
+export default function Discussion({ courseId, courseName }) {
   return (
     <div>
       <AppBar position="static" color="transparent">
@@ -20,7 +46,7 @@ export default function Discussion() {
             </Grid>
             <Grid item xs={4}>
               <Typography variant="h6" align="center">
-                Introduction to Computer Systems: Discussion
+                {courseName}: Discussion
               </Typography>
             </Grid>
           </Grid>
@@ -36,13 +62,13 @@ export default function Discussion() {
             </Link>
             <Breadcrumbs separator=":" aria-label="breadcrumb">
               <Typography color="textPrimary">
-                Introduction to Computer Systems
+                {courseName}
               </Typography>
               <Breadcrumbs separator="/" aria-label="breadcrumb">
                 <Typography color="textPrimary">
                   Discussion
                 </Typography>
-                <Link color="inherit" href="/homework">
+                <Link color="inherit" href={`/homework/${courseId}`}>
                   Homework
                 </Link>
               </Breadcrumbs>
