@@ -17,7 +17,7 @@ const fetcher = (url) => fetch(url).then((r) => r.json());
 
 export default function Courses() {
   // eslint-disable-next-line no-unused-vars
-  const { data, error } = useSWR("api/courses", fetcher);
+  const { data, error } = useSWR("/api/courses", fetcher);
 
   let courseList;
   if (!data) {

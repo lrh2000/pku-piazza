@@ -12,9 +12,12 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
 import Button from "@material-ui/core/Button";
-
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { getCourseName } from "../../src/db/courses.js";
+import useSWR from "swr";
+import { List, ListItem } from "@material-ui/core";
 
+const fetcher = (url) => fetch(url).then((r) => r.json());
 export function getStaticPaths() {
   return {
     paths: [],
@@ -40,6 +43,51 @@ export async function getStaticProps(context) {
 }
 
 function Homework({ courseId, courseName }) {
+  //console.log(`api/homework/${courseId}`);
+  
+  const {data, error} = useSWR(`/api/homework/${courseId}`, fetcher);
+  let homeworkList;
+  if(!data){
+    homeworkList = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <CircularProgress />
+        <Box mt="10px">
+          <Typography variant="h5"> Loading... </Typography>
+        </Box>
+      </Box>
+    );
+  }
+  else{
+    const homeworkItems = data.map((homework) =>(
+      <React.Fragment key={Homework}>
+        <ListItem>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Homework {homework.homeworkid}
+              </Typography>
+              <Typography color="textSecondary">Assign Date: {homework.assign}</Typography>
+              <Typography color="textSecondary">Due Date: {homework.due}</Typography>
+              <Typography>{homework.content}</Typography>
+            </CardContent>
+            <CardActions>
+              <Button size="small" color="primary">
+                {" "}
+                Submit{" "}
+              </Button>
+            </CardActions>
+          </Card>
+        </ListItem>
+      </React.Fragment>
+    ));
+    homeworkList = (
+      <List>
+        {homeworkItems}
+      </List>
+    );
+  }
+  
+
   return (
     <div>
       <AppBar position="static" color="transparent">
@@ -84,21 +132,7 @@ function Homework({ courseId, courseName }) {
           p="10px"
           minHeight="500px"
         >
-          <Card>
-            <CardContent>
-              <Typography color="textSecondary">2021/5/24</Typography>
-              <Typography variant="h5" gutterBottom>
-                Homework 1
-              </Typography>
-              <Typography>Exercise 2.3.3</Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small" color="primary">
-                {" "}
-                Submit{" "}
-              </Button>
-            </CardActions>
-          </Card>
+          {homeworkList}
         </Box>
       </Container>
     </div>
