@@ -1,4 +1,4 @@
 import { createPool } from "slonik";
 
-const uri = "postgres://pyyjason:ppyy213%@localhost:5432/piazza";
+const uri = "postgres://postgres@127.0.0.1:5432/postgres";
 export const pool = createPool(uri);

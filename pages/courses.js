@@ -20,6 +20,8 @@ export default function Courses() {
   const { data, error } = useSWR("/api/courses", fetcher);
 
   let courseList;
+  let greetUser;
+
   if (!data) {
     courseList = (
       <Box display="flex" flexDirection="column" alignItems="center">
@@ -29,8 +31,10 @@ export default function Courses() {
         </Box>
       </Box>
     );
+
+    greetUser = "";
   } else {
-    const courseItems = data.map((course) => (
+    const courseItems = data.courses.map((course) => (
       <React.Fragment key={course.id}>
         <ListItem>
           <Grid container spacing={1}>
@@ -56,6 +60,53 @@ export default function Courses() {
         {courseItems}
       </List>
     );
+
+    const handleLogout = async (event) => {
+      event.preventDefault();
+
+      const result = await fetch("/api/users", {
+        body: JSON.stringify({
+          action: "logout",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      }).then((x) => x.json());
+
+      if (result.ok) {
+        window.location.reload();
+      }
+    };
+
+    if (typeof data.user === "object") {
+      let greeting;
+      const now = new Date().getHours();
+      if (now < 12) {
+        greeting = "Good morning";
+      } else if (now < 18) {
+        greeting = "Good afternoon";
+      } else {
+        greeting = "Good evening";
+      }
+
+      greetUser = (
+        <Typography variant="h6" align="right">
+          <Box display="inline-block" mr="20px">
+            {greeting}, {data.user.name}.
+          </Box>
+          <Link href="#" onClick={handleLogout}>
+            Logout
+          </Link>
+        </Typography>
+      );
+    } else {
+      greetUser = (
+        <Typography variant="h6" align="right">
+          <Link href="/login">Login</Link>
+        </Typography>
+      );
+    }
   }
 
   return (
@@ -72,6 +123,9 @@ export default function Courses() {
               <Typography variant="h6" align="center">
                 Course List
               </Typography>
+            </Grid>
+            <Grid item xs={4}>
+              {greetUser}
             </Grid>
           </Grid>
         </Toolbar>

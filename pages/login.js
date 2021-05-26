@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Box from "@material-ui/core/Box";
 import Link from "@material-ui/core/Link";
 import TextField from "@material-ui/core/TextField";
@@ -7,6 +7,42 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 
 export default function Login() {
+  const [state, setState] = useState({
+    message: "\u200b",
+    disabled: false,
+  });
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    setState({
+      message: "Processing...",
+      disabled: true,
+    });
+
+    const result = await fetch("/api/users", {
+      body: JSON.stringify({
+        action: "login",
+        payload: {
+          username: event.target.username.value,
+          password: event.target.password.value,
+        },
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    }).then((x) => x.json());
+
+    if (result.ok) {
+      window.location.href = "/courses";
+    } else {
+      setState({
+        message: result.msg,
+        disabled: false,
+      });
+    }
+  };
+
   return (
     <Box
       display="flex"
@@ -23,7 +59,7 @@ export default function Login() {
         pb={12}
         width="30rem"
       >
-        <form>
+        <form onSubmit={onSubmit}>
           <Grid
             container
             alignItems="center"
@@ -47,12 +83,20 @@ export default function Login() {
                 <TextField id="password" label="Password" fullWidth />
               </Grid>
             </Grid>
+            <Grid item xs={12}>
+              <Typography color="secondary">{state.message}</Typography>
+            </Grid>
             <Grid item xs={12} container>
               <Grid item xs={6} container justify="flex-start">
                 <Link href="/signup">Sign up</Link>
               </Grid>
               <Grid item xs={6} container justify="flex-end">
-                <Button variant="contained" color="primary">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  disabled={state.disabled}
+                >
                   Login
                 </Button>
               </Grid>

@@ -43,11 +43,11 @@ export async function getStaticProps(context) {
 }
 
 function Homework({ courseId, courseName }) {
-  //console.log(`api/homework/${courseId}`);
-  
-  const {data, error} = useSWR(`/api/homework/${courseId}`, fetcher);
+  // eslint-disable-next-line no-unused-vars
+  const { data, error } = useSWR(`/api/homework/${courseId}`, fetcher);
+
   let homeworkList;
-  if(!data){
+  if (!data) {
     homeworkList = (
       <Box display="flex" flexDirection="column" alignItems="center">
         <CircularProgress />
@@ -56,18 +56,21 @@ function Homework({ courseId, courseName }) {
         </Box>
       </Box>
     );
-  }
-  else{
-    const homeworkItems = data.map((homework) =>(
-      <React.Fragment key={Homework}>
-        <ListItem>
+  } else {
+    const homeworkItems = data.map((homework) => (
+      <ListItem key={homework.homeworkid}>
+        <Box width="100%">
           <Card>
             <CardContent>
               <Typography variant="h5" gutterBottom>
                 Homework {homework.homeworkid}
               </Typography>
-              <Typography color="textSecondary">Assign Date: {homework.assign}</Typography>
-              <Typography color="textSecondary">Due Date: {homework.due}</Typography>
+              <Typography color="textSecondary">
+                Assign Date: {homework.assign}
+              </Typography>
+              <Typography color="textSecondary">
+                Due Date: {homework.due}
+              </Typography>
               <Typography>{homework.content}</Typography>
             </CardContent>
             <CardActions>
@@ -77,16 +80,12 @@ function Homework({ courseId, courseName }) {
               </Button>
             </CardActions>
           </Card>
-        </ListItem>
-      </React.Fragment>
+        </Box>
+      </ListItem>
     ));
-    homeworkList = (
-      <List>
-        {homeworkItems}
-      </List>
-    );
+
+    homeworkList = <List>{homeworkItems}</List>;
   }
-  
 
   return (
     <div>
