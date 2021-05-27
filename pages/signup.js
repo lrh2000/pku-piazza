@@ -1,22 +1,22 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import Box from "@material-ui/core/Box";
 import Link from "@material-ui/core/Link";
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';  
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
 
 export default function Login() {
   const [state, setState] = useState({
     message: "\u200b",
     disabled: false,
   });
-  const [identity, setIdentity] = useState('');
+  const [identity, setIdentity] = useState("");
 
   const handleChange = (event) => {
     setIdentity(event.target.value);
@@ -95,17 +95,17 @@ export default function Login() {
               </Grid>
               <Grid item xs={12}>
                 <FormControl required>
-                    <InputLabel id="identity" >Identity</InputLabel>
-                    <Select
+                  <InputLabel id="identity">Identity</InputLabel>
+                  <Select
                     labelId="identity"
                     id="Identity"
                     value={identity}
                     onChange={handleChange}
-                    >
+                  >
                     <MenuItem value={0}>Student</MenuItem>
                     <MenuItem value={1}>Faculty</MenuItem>
-                    </Select>
-                    <FormHelperText>Required</FormHelperText>
+                  </Select>
+                  <FormHelperText>Required</FormHelperText>
                 </FormControl>
               </Grid>
             </Grid>
@@ -114,7 +114,7 @@ export default function Login() {
             </Grid>
             <Grid item xs={12} container>
               <Grid item xs={6} container justify="flex-start">
-                <Link href="/login">login</Link>
+                <Link href="/login">Login</Link>
               </Grid>
               <Grid item xs={6} container justify="flex-end">
                 <Button
