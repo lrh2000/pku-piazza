@@ -93,14 +93,15 @@ export default function Login() {
               <Grid item xs={12}>
                 <TextField id="password" label="Password" fullWidth />
               </Grid>
-              <Grid item xs={12}>
-                <FormControl required>
+              <Grid item xs={6}>
+                <FormControl required fullWidth>
                   <InputLabel id="identity">Identity</InputLabel>
                   <Select
                     labelId="identity"
                     id="Identity"
                     value={identity}
                     onChange={handleChange}
+                    autoWidth
                   >
                     <MenuItem value={0}>Student</MenuItem>
                     <MenuItem value={1}>Faculty</MenuItem>
@@ -108,13 +109,14 @@ export default function Login() {
                   <FormHelperText>Required</FormHelperText>
                 </FormControl>
               </Grid>
+              <Grid item xs={6}></Grid>
             </Grid>
             <Grid item xs={12}>
               <Typography color="secondary">{state.message}</Typography>
             </Grid>
             <Grid item xs={12} container>
               <Grid item xs={6} container justify="flex-start">
-                <Link href="/login">login</Link>
+                <Link href="/login">Login</Link>
               </Grid>
               <Grid item xs={6} container justify="flex-end">
                 <Button

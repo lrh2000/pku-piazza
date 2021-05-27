@@ -1,5 +1,5 @@
 CREATE TABLE public.courses (
-  id INTEGER NOT NULL,
+  id SERIAL,
   name TEXT NOT NULL
 );
 
@@ -18,6 +18,7 @@ CREATE TABLE public.discussion(
   createdate DATE,
   theme TEXT
 );
+
 CREATE TABLE public.discussionContent(
   discussionid INTEGER NOT NULL,
   postid SERIAL,
@@ -34,12 +35,19 @@ CREATE TABLE public.users (
   salt CHAR(16) NOT NULL
 );
 
+CREATE TABLE public.submission (
+  courseid INTEGER NOT NULL,
+  homeworkid INTEGER NOT NULL,
+  userid INTEGER NOT NULL,
+  content TEXT
+);
+
 INSERT
   INTO
     public.courses (id, name)
   VALUES
-    (1, 'Introduction to Computer Systems'),
-    (2, 'Data Structures and Algorithms');
+    (DEFAULT, 'Introduction to Computer Systems'),
+    (DEFAULT, 'Data Structures and Algorithms');
 
 INSERT 
   INTO
@@ -71,3 +79,9 @@ INSERT
       -- password plaintext: 'pwd of pyy'
     (DEFAULT, 'Ruihan Li', 'w4mI2IGMR3HwieVetUv9AwYW6NdimGFK4usDiloV0KMnV94Yc3bfP17RHD63Jn6j',0, '7Ag90MgNRyHNZkrM');
       -- password plaintext: 'pwd of lrh'
+
+INSERT
+  INTO
+    public.submission (courseid, homeworkid, userid, content)
+  VALUES
+    (2, 1, 1, "985");

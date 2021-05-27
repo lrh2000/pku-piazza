@@ -1,12 +1,27 @@
 import { getDiscussionContentByDID } from "../../src/db/discussion";
+import { withSession } from "../../src/session";
 
-async function handleDiscussioncontent(req, res) {
+async function handleDiscussionContent(req, res) {
+  const user = req.session.get("user");
+  if (!user) {
+    return {
+      ok: false,
+      msg: "Not logged in",
+      homework: [],
+    };
+  }
+
   const payload = req.body.payload;
   const discussionContent = await getDiscussionContentByDID(
     payload.discussionId
   );
-  return discussionContent;
+  return {
+    ok: true,
+    user: user,
+    content: discussionContent,
+  };
 }
+
 function dispatch(req) {
   if (
     req.method !== "POST" ||
@@ -24,21 +39,18 @@ function dispatch(req) {
     ) {
       return null;
     }
-    return handleDiscussioncontent;
+    return handleDiscussionContent;
   }
 
   return null;
 }
 
-export default async (req, res) => {
+export default withSession(async (req, res) => {
   const handler = dispatch(req);
   if (!handler) {
-    res.status(400).json({
-      ok: false,
-      message: "Invalid argument",
-    });
+    res.status(400).json({ ok: false, msg: "Invalid arguments" });
   } else {
-    const ret = await handler(req, res);
-    res.status(200).json(ret);
+    const result = await handler(req, res);
+    res.status(200).json(result);
   }
-};
+});

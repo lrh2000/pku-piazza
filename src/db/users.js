@@ -37,17 +37,21 @@ export async function setUser(name, password, identity) {
   if (!name || !password) {
     return null;
   }
+
   const salt = crypto.randomBytes(12).toString("base64");
   const calSalt = baseSalt + salt;
   const key = crypto.scryptSync(password, calSalt, 48).toString("base64");
+
   const result = await pool.connect(async (connection) => {
     const data = connection.query(
-      sql`INSERT INTO public.users (id, name, password, identity, salt)
-      VALUES (DEFAULT, ${name}, ${key}, ${identity},${salt})
-      RETURNING id;`
+      sql`INSERT
+        INTO users (id, name, password, identity, salt)
+        VALUES (DEFAULT, ${name}, ${key}, ${identity}, ${salt})
+        RETURNING id`
     );
     return data;
   });
+
   const rows = result.rows;
   if (rows.length === 0) {
     return null;

@@ -1,8 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
@@ -13,10 +10,13 @@ import CardContent from "@material-ui/core/CardContent";
 import CardActions from "@material-ui/core/CardActions";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import Header from "../../../src/ui/Header";
 import useSWR from "swr";
-import { List, ListItem } from "@material-ui/core";
-import { getCourseName } from "../../../src/db/courses.js";
-import { getDiscussionByDID } from "../../../src/db/discussion.js";
+
+import { getCourseName } from "../../../src/db/courses";
+import { getDiscussionByDID } from "../../../src/db/discussion";
 
 export function getStaticPaths() {
   return {
@@ -35,7 +35,6 @@ export async function getStaticProps(context) {
   }
   const did = Number.parseInt(context.params.did);
   const discussion = await getDiscussionByDID(did);
-  // console.log(discussion);
   if (!discussion) {
     return {
       notFound: true,
@@ -78,7 +77,7 @@ function Discussion({ courseId, courseName, discussionId }) {
       </Box>
     );
   } else {
-    const discussionContentItems = data.map((discussionContent) => (
+    const discussionContentItems = data.content.map((discussionContent) => (
       <ListItem key={discussionContent}>
         <Box width="100%">
           <Card>
@@ -109,22 +108,7 @@ function Discussion({ courseId, courseName, discussionId }) {
 
   return (
     <div>
-      <AppBar position="static" color="transparent">
-        <Toolbar>
-          <Grid container alignItems="center">
-            <Grid item xs={4}>
-              <Typography variant="h3" align="left">
-                PKU Piazza
-              </Typography>
-            </Grid>
-            <Grid item xs={4}>
-              <Typography variant="h6" align="center">
-                {courseName}: Discussion
-              </Typography>
-            </Grid>
-          </Grid>
-        </Toolbar>
-      </AppBar>
+      <Header title={`${courseName}: Discussion`} data={data} />
       <Container>
         <Box mx="10px" px="10px" pt="10px" mt="10px">
           <Breadcrumbs separator=">" aria-label="breadcrumb">

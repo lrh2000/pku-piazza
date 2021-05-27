@@ -34,29 +34,31 @@ async function handleLogout(req, res) {
   req.session.destroy();
   return { ok: true };
 }
+
 async function handleSignup(req, res) {
   const payload = req.body.payload;
+
   const user = await getUserByName(payload.username);
   if (user) {
     return {
       ok: false,
-      msg: "Username Already Signed Up",
+      msg: "The username already exists. Try another.",
     };
   }
-  // Register here
+
   const newuser = await setUser(
     payload.username,
     payload.password,
     parseInt(payload.identity)
   );
-  // console.log(newuser.id);
+
   req.session.set("user", {
     id: newuser.id,
     name: newuser.name,
     identity: newuser.identity,
   });
-
   await req.session.save();
+
   return { ok: true };
 }
 
@@ -81,7 +83,6 @@ function dispatch(req) {
   } else if (req.body.action === "logout") {
     return handleLogout;
   } else if (req.body.action === "signup") {
-    // console.log(req.body.payload);
     if (
       typeof req.body.payload !== "object" ||
       typeof req.body.payload.username !== "string" ||
