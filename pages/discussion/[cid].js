@@ -43,49 +43,51 @@ export async function getStaticProps(context) {
 }
 
 function Discussion({ courseId, courseName }) {
-    // eslint-disable-next-line no-unused-vars
-    const { data, error } = useSWR(`/api/discussion/${courseId}`, fetcher);
+  const { data } = useSWR(`/api/discussion/${courseId}`, fetcher);
 
-    let discussionList;
-    if (!data) {
-      discussionList = (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <CircularProgress />
-          <Box mt="10px">
-            <Typography variant="h5"> Loading... </Typography>
-          </Box>
+  let discussionList;
+  if (!data) {
+    discussionList = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <CircularProgress />
+        <Box mt="10px">
+          <Typography variant="h5"> Loading... </Typography>
         </Box>
-      );
-    } else {
-      const discussionItems = data.map((discussion) => (
-        <ListItem key={discussion.discussionid}>
-          <Box width="100%">
-            <Card>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Discussion {discussion.discussionid}
-                </Typography>
-                <Typography color="textSecondary">
-                  Create User: {discussion.userid}
-                </Typography>
-                <Typography color="textSecondary">
-                  Create Date: {discussion.createdate}
-                </Typography>
-                <Typography>{discussion.theme}</Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary">
-                  <Link href={`/discussion/${courseId}/${discussion.discussionid}`}>Enter</Link>
-                </Button>
-              </CardActions>
-            </Card>
-          </Box>
-        </ListItem>
-      ));
-  
-      discussionList = <List>{discussionItems}</List>;
-    }
+      </Box>
+    );
+  } else {
+    const discussionItems = data.map((discussion) => (
+      <ListItem key={discussion.discussionid}>
+        <Box width="100%">
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Discussion {discussion.discussionid}
+              </Typography>
+              <Typography color="textSecondary">
+                Create User: {discussion.userid}
+              </Typography>
+              <Typography color="textSecondary">
+                Create Date: {discussion.createdate}
+              </Typography>
+              <Typography>{discussion.theme}</Typography>
+            </CardContent>
+            <CardActions>
+              <Button size="small" color="primary">
+                <Link
+                  href={`/discussion/${courseId}/${discussion.discussionid}`}
+                >
+                  Enter
+                </Link>
+              </Button>
+            </CardActions>
+          </Card>
+        </Box>
+      </ListItem>
+    ));
 
+    discussionList = <List>{discussionItems}</List>;
+  }
 
   return (
     <div>

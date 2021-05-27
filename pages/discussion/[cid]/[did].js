@@ -16,7 +16,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import useSWR from "swr";
 import { List, ListItem } from "@material-ui/core";
 import { getCourseName } from "../../../src/db/courses.js";
-import { getDiscussionByDID } from "../../../src/db/discussion.js"
+import { getDiscussionByDID } from "../../../src/db/discussion.js";
 
 export function getStaticPaths() {
   return {
@@ -35,11 +35,11 @@ export async function getStaticProps(context) {
   }
   const did = Number.parseInt(context.params.did);
   const discussion = await getDiscussionByDID(did);
-  //console.log(discussion);
-  if (!discussion){
-      return {
-          notFound: true,
-      }
+  // console.log(discussion);
+  if (!discussion) {
+    return {
+      notFound: true,
+    };
   }
   return {
     props: {
@@ -51,62 +51,61 @@ export async function getStaticProps(context) {
 }
 
 function Discussion({ courseId, courseName, discussionId }) {
-    // eslint-disable-next-line no-unused-vars
-    const fetcher = (url, courseId, discussionId) => fetch(url, {
+  const fetcher = (url, courseId, discussionId) =>
+    fetch(url, {
       body: JSON.stringify({
         action: "content",
         payload: {
-            courseId: courseId,
-            discussionId: discussionId,
+          courseId: courseId,
+          discussionId: discussionId,
         },
-    }),
-    headers: {
+      }),
+      headers: {
         "Content-Type": "application/json",
-    },
-    method: "POST",
+      },
+      method: "POST",
     }).then((r) => r.json());
-    const { data, error } = useSWR(["/api/discussion", courseId, discussionId], fetcher);
-    
-    let discussionContentList;
-    if (!data) {
-      discussionContentList = (
+  const { data } = useSWR(["/api/discussion", courseId, discussionId], fetcher);
+
+  let discussionContentList;
+  if (!data) {
+    discussionContentList = (
       <Box display="flex" flexDirection="column" alignItems="center">
         <CircularProgress />
         <Box mt="10px">
           <Typography variant="h5"> Loading... </Typography>
         </Box>
       </Box>
-      );
-    } else {
-        const discussionContentItems = data.map((discussionContent) => (
-          <ListItem key={discussionContent}>
-            <Box width="100%">
-              <Card>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Thread {discussionContent.postid}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Create User: {discussionContent.userid}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Create Date: {discussionContent.createdate}
-                  </Typography>
-                  <Typography>{discussionContent.content}</Typography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small" color="primary">
-                    {" "}
-                    Create Thread{" "}
-                  </Button>
-                </CardActions>
-              </Card>
-            </Box>
-          </ListItem>
-        ));
-      discussionContentList = <List>{discussionContentItems}</List>;
-    }
-
+    );
+  } else {
+    const discussionContentItems = data.map((discussionContent) => (
+      <ListItem key={discussionContent}>
+        <Box width="100%">
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Thread {discussionContent.postid}
+              </Typography>
+              <Typography color="textSecondary">
+                Create User: {discussionContent.userid}
+              </Typography>
+              <Typography color="textSecondary">
+                Create Date: {discussionContent.createdate}
+              </Typography>
+              <Typography>{discussionContent.content}</Typography>
+            </CardContent>
+            <CardActions>
+              <Button size="small" color="primary">
+                {" "}
+                Create Thread{" "}
+              </Button>
+            </CardActions>
+          </Card>
+        </Box>
+      </ListItem>
+    ));
+    discussionContentList = <List>{discussionContentItems}</List>;
+  }
 
   return (
     <div>
@@ -152,7 +151,7 @@ function Discussion({ courseId, courseName, discussionId }) {
           p="10px"
           minHeight="500px"
         >
-            {discussionContentList}
+          {discussionContentList}
         </Box>
       </Container>
     </div>

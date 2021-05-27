@@ -29,37 +29,37 @@ export async function getDiscussionByCID(cid) {
 }
 
 export async function getDiscussionByDID(did) {
-    if (typeof did !== "number") {
-        return null;
-    }
-    if (isNaN(did)) {
-        return null;
-    }
-    const result = await pool.connect(async (connection) => {
-        const data = await connection.query(
-        sql`SELECT * FROM discussion WHERE discussionid = ${did}`
-        );
-        return data;
-    });
+  if (typeof did !== "number") {
+    return null;
+  }
+  if (isNaN(did)) {
+    return null;
+  }
+  const result = await pool.connect(async (connection) => {
+    const data = await connection.query(
+      sql`SELECT * FROM discussion WHERE discussionid = ${did}`
+    );
+    return data;
+  });
 
-    const rows = result.rows;
-    return rows;
+  const rows = result.rows;
+  return rows;
 }
 
-export async function getDiscussionContentByDID(did){
-    if (typeof did !== "number") {
-        return null;
-    }
-    if (isNaN(did)) {
-        return null;
-    }
-    const result = await pool.connect(async (connection) => {
-        const data = await connection.query(
-        sql`SELECT * FROM discussionContent WHERE discussionid = ${did}`
-        );
-        return data;
-    });
+export async function getDiscussionContentByDID(did) {
+  if (typeof did !== "number") {
+    return null;
+  }
+  if (isNaN(did)) {
+    return null;
+  }
+  const result = await pool.connect(async (connection) => {
+    const data = await connection.query(
+      sql`SELECT * FROM discussionContent WHERE discussionid = ${did}`
+    );
+    return data;
+  });
 
-    const rows = result.rows;
-    return rows;
+  const rows = result.rows;
+  return rows;
 }

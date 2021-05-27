@@ -2,7 +2,9 @@ import { getDiscussionContentByDID } from "../../src/db/discussion";
 
 async function handleDiscussioncontent(req, res) {
   const payload = req.body.payload;
-  const discussionContent = await getDiscussionContentByDID(payload.discussionId);
+  const discussionContent = await getDiscussionContentByDID(
+    payload.discussionId
+  );
   return discussionContent;
 }
 function dispatch(req) {
@@ -23,7 +25,7 @@ function dispatch(req) {
       return null;
     }
     return handleDiscussioncontent;
-  } 
+  }
 
   return null;
 }

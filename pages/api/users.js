@@ -43,17 +43,21 @@ async function handleSignup(req, res) {
       msg: "Username Already Signed Up",
     };
   }
-  //Register here
-  const newuser = await setUser(payload.username, payload.password, parseInt(payload.identity)); 
-  //console.log(newuser.id);
+  // Register here
+  const newuser = await setUser(
+    payload.username,
+    payload.password,
+    parseInt(payload.identity)
+  );
+  // console.log(newuser.id);
   req.session.set("user", {
     id: newuser.id,
     name: newuser.name,
     identity: newuser.identity,
   });
-  
+
   await req.session.save();
-  return {ok: true};
+  return { ok: true };
 }
 
 function dispatch(req) {
@@ -77,13 +81,15 @@ function dispatch(req) {
   } else if (req.body.action === "logout") {
     return handleLogout;
   } else if (req.body.action === "signup") {
-    //console.log(req.body.payload);
+    // console.log(req.body.payload);
     if (
       typeof req.body.payload !== "object" ||
       typeof req.body.payload.username !== "string" ||
       typeof req.body.payload.password !== "string" ||
-      (!(parseInt(req.body.payload.identity) === 1 || 
-      parseInt(req.body.payload.identity) === 0))
+      !(
+        parseInt(req.body.payload.identity) === 1 ||
+        parseInt(req.body.payload.identity) === 0
+      )
     ) {
       return null;
     }
