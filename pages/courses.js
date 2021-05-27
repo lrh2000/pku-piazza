@@ -101,11 +101,9 @@ export default function Courses() {
         </Typography>
       );
     } else {
-      greetUser = (
-        <Typography variant="h6" align="right">
-          <Link href="/login">Login</Link>
-        </Typography>
-      );
+      window.location.href = "/login";
+      greetUser = null;
+      courseList = null;
     }
   }
 

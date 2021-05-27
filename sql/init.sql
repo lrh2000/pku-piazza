@@ -12,9 +12,10 @@ CREATE TABLE public.homework (
 );
 
 CREATE TABLE public.users (
-  id INTEGER NOT NULL,
+  id SERIAL,
   name VARCHAR(20) NOT NULL,
   password CHAR(64) NOT NULL,
+  identity INTEGER NOT NULL,
   salt CHAR(16) NOT NULL
 );
 
@@ -36,9 +37,9 @@ INSERT
 
 INSERT
   INTO
-    public.users (id, name, password, salt)
+    public.users (id, name, password, identity, salt)
   VALUES
-    (1, 'Yueyang Pan', 'XKxoXQecnkife2E3dPQFM6VdAsD8EF+hqifsaGoJg5aOkWJNipSzDwWSqrBQYqV2', 'M2ReP8kdCYkXZ0B4'),
+    (DEFAULT, 'Yueyang Pan', 'XKxoXQecnkife2E3dPQFM6VdAsD8EF+hqifsaGoJg5aOkWJNipSzDwWSqrBQYqV2',0, 'M2ReP8kdCYkXZ0B4'),
       -- password plaintext: 'pwd of pyy'
-    (2, 'Ruihan Li', 'w4mI2IGMR3HwieVetUv9AwYW6NdimGFK4usDiloV0KMnV94Yc3bfP17RHD63Jn6j', '7Ag90MgNRyHNZkrM');
+    (DEFAULT, 'Ruihan Li', 'w4mI2IGMR3HwieVetUv9AwYW6NdimGFK4usDiloV0KMnV94Yc3bfP17RHD63Jn6j',0, '7Ag90MgNRyHNZkrM');
       -- password plaintext: 'pwd of lrh'

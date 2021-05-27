@@ -1,5 +1,5 @@
 import { withSession } from "../../src/session";
-import { getUserByName, checkPassword } from "../../src/db/users";
+import { getUserByName, checkPassword, setUser } from "../../src/db/users";
 
 async function handleLogin(req, res) {
   const payload = req.body.payload;
@@ -23,6 +23,7 @@ async function handleLogin(req, res) {
   req.session.set("user", {
     id: user.id,
     name: user.name,
+    identity: user.identity,
   });
   await req.session.save();
 
@@ -32,6 +33,27 @@ async function handleLogin(req, res) {
 async function handleLogout(req, res) {
   req.session.destroy();
   return { ok: true };
+}
+async function handleSignup(req, res) {
+  const payload = req.body.payload;
+  const user = await getUserByName(payload.username);
+  if (user) {
+    return {
+      ok: false,
+      msg: "Username Already Signed Up",
+    };
+  }
+  //Register here
+  const newuser = await setUser(payload.username, payload.password, parseInt(payload.identity)); 
+  //console.log(newuser.id);
+  req.session.set("user", {
+    id: newuser.id,
+    name: newuser.name,
+    identity: newuser.identity,
+  });
+  
+  await req.session.save();
+  return {ok: true};
 }
 
 function dispatch(req) {
@@ -54,6 +76,18 @@ function dispatch(req) {
     return handleLogin;
   } else if (req.body.action === "logout") {
     return handleLogout;
+  } else if (req.body.action === "signup") {
+    //console.log(req.body.payload);
+    if (
+      typeof req.body.payload !== "object" ||
+      typeof req.body.payload.username !== "string" ||
+      typeof req.body.payload.password !== "string" ||
+      (!(parseInt(req.body.payload.identity) === 1 || 
+      parseInt(req.body.payload.identity) === 0))
+    ) {
+      return null;
+    }
+    return handleSignup;
   }
 
   return null;
