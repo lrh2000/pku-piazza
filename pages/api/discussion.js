@@ -2,9 +2,7 @@ import { getDiscussionContentByDID } from "../../src/db/discussion";
 
 async function handleDiscussioncontent(req, res) {
   const payload = req.body.payload;
-  console.log(payload);
   const discussionContent = await getDiscussionContentByDID(payload.discussionId);
-  console.log(discussionContent);
   return discussionContent;
 }
 function dispatch(req) {
@@ -38,6 +36,7 @@ export default async (req, res) => {
       message: "Invalid argument",
     });
   } else {
-    res.status(200).json(await handler(req, res));
+    const ret = await handler(req, res);
+    res.status(200).json(ret);
   }
 };

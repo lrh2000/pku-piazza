@@ -25,9 +25,6 @@ export async function getDiscussionByCID(cid) {
   });
 
   const rows = result.rows;
-  if (rows.length === 0) {
-    return null;
-  }
   return rows;
 }
 
@@ -46,9 +43,6 @@ export async function getDiscussionByDID(did) {
     });
 
     const rows = result.rows;
-    if (rows.length === 0) {
-        return null;
-    }
     return rows;
 }
 
@@ -67,8 +61,5 @@ export async function getDiscussionContentByDID(did){
     });
 
     const rows = result.rows;
-    if (rows.length === 0) {
-        return null;
-    }
     return rows;
 }

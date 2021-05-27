@@ -25,8 +25,5 @@ export async function getHomeworkByCID(cid) {
   });
 
   const rows = result.rows;
-  if (rows.length === 0) {
-    return null;
-  }
   return rows;
 }

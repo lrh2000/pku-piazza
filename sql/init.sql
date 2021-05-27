@@ -21,7 +21,7 @@ CREATE TABLE public.discussion(
 CREATE TABLE public.discussionContent(
   discussionid INTEGER NOT NULL,
   postid SERIAL,
-  createdata DATE,
+  createdate DATE,
   useid INTEGER NOT NULL,
   content TEXT
 );
@@ -56,6 +56,12 @@ INSERT
   VALUES 
     (1, DEFAULT, 1, '2021-05-27', 'Cache Coherence'),
     (2, DEFAULT, 2, '2021-05-27', 'Munkre Algorithm');
+
+INSERT
+  INTO
+    public.discussionContent (discussionid, postid, createdate, useid, content)
+  VALUES
+    (1, DEFAULT, '2021-05-27', 1, 'What is the difference between cache coherence and memory consistency?');
 
 INSERT
   INTO

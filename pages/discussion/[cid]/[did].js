@@ -52,62 +52,58 @@ export async function getStaticProps(context) {
 
 function Discussion({ courseId, courseName, discussionId }) {
     // eslint-disable-next-line no-unused-vars
-    const data = fetch("/api/discussion", {
-        body: JSON.stringify({
-            action: "content",
-            payload: {
-                courseId: courseId,
-                discussionId: discussionId,
-            },
-        }),
-        headers: {
-            "Content-Type": "application/json",
+    const fetcher = (url, courseId, discussionId) => fetch(url, {
+      body: JSON.stringify({
+        action: "content",
+        payload: {
+            courseId: courseId,
+            discussionId: discussionId,
         },
-        method: "POST",
-    }).then((x) => x.json());
-    console.log(data);
+    }),
+    headers: {
+        "Content-Type": "application/json",
+    },
+    method: "POST",
+    }).then((r) => r.json());
+    const { data, error } = useSWR(["/api/discussion", courseId, discussionId], fetcher);
     
     let discussionContentList;
     if (!data) {
-        discussionContentList = (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <CircularProgress />
-          <Box mt="10px">
-            <Typography variant="h5"> Loading... </Typography>
-          </Box>
+      discussionContentList = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <CircularProgress />
+        <Box mt="10px">
+          <Typography variant="h5"> Loading... </Typography>
         </Box>
+      </Box>
       );
     } else {
-      //console.log(data);
-      const discussionContentItems = null;
-      /*
-      const discussionContentItems = data.map((discussionContent) => (
-        <ListItem key={discussionContent}>
-          <Box width="100%">
-            <Card>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Thread {discussionContent.postid}
-                </Typography>
-                <Typography color="textSecondary">
-                  Create User: {discussionContent.userid}
-                </Typography>
-                <Typography color="textSecondary">
-                  Create Date: {discussionContent.createdate}
-                </Typography>
-                <Typography>{discussionContent.content}</Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary">
-                  {" "}
-                  Create Thread{" "}
-                </Button>
-              </CardActions>
-            </Card>
-          </Box>
-        </ListItem>
-      ));
-      */
+        const discussionContentItems = data.map((discussionContent) => (
+          <ListItem key={discussionContent}>
+            <Box width="100%">
+              <Card>
+                <CardContent>
+                  <Typography variant="h5" gutterBottom>
+                    Thread {discussionContent.postid}
+                  </Typography>
+                  <Typography color="textSecondary">
+                    Create User: {discussionContent.userid}
+                  </Typography>
+                  <Typography color="textSecondary">
+                    Create Date: {discussionContent.createdate}
+                  </Typography>
+                  <Typography>{discussionContent.content}</Typography>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" color="primary">
+                    {" "}
+                    Create Thread{" "}
+                  </Button>
+                </CardActions>
+              </Card>
+            </Box>
+          </ListItem>
+        ));
       discussionContentList = <List>{discussionContentItems}</List>;
     }
 
