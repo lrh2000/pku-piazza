@@ -11,6 +11,21 @@ CREATE TABLE public.homework (
   due DATE 
 );
 
+CREATE TABLE public.discussion(
+  courseid INTEGER NOT NULL,
+  discussionid SERIAL,
+  userid INTEGER NOT NULL,
+  createdate DATE,
+  theme TEXT
+);
+CREATE TABLE public.discussionContent(
+  discussionid INTEGER NOT NULL,
+  postid SERIAL,
+  createdata DATE,
+  useid INTEGER NOT NULL,
+  content TEXT
+);
+
 CREATE TABLE public.users (
   id SERIAL,
   name VARCHAR(20) NOT NULL,
@@ -34,6 +49,13 @@ INSERT
     (1, 2, 'Exercise 3.4.6', '2021-05-24','2021-05-31'),
     (2, 1, 'Exercise 7.8.1', '2021-05-24','2021-05-31'),
     (2, 2, 'Exercise 8.6.2', '2021-05-24','2021-05-31');
+
+INSERT
+  INTO 
+    public.discussion (courseid, discussionid, userid, createdate, theme)
+  VALUES 
+    (1, DEFAULT, 1, '2021-05-27', 'Cache Coherence'),
+    (2, DEFAULT, 2, '2021-05-27', 'Munkre Algorithm');
 
 INSERT
   INTO

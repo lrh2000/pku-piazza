@@ -86,7 +86,12 @@ function Homework({ courseId, courseName }) {
 
     homeworkList = <List>{homeworkItems}</List>;
   }
-
+  /*
+  if (typeof data.user !== "object") {
+    window.location.href = "/login";
+    homeworkList = null;
+  }
+  */
   return (
     <div>
       <AppBar position="static" color="transparent">

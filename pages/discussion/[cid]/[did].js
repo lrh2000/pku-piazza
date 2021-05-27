@@ -15,9 +15,9 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import useSWR from "swr";
 import { List, ListItem } from "@material-ui/core";
-import { getCourseName } from "../../src/db/courses.js";
+import { getCourseName } from "../../../src/db/courses.js";
+import { getDiscussionByDID } from "../../../src/db/discussion.js"
 
-const fetcher = (url) => fetch(url).then((r) => r.json());
 export function getStaticPaths() {
   return {
     paths: [],
@@ -33,22 +33,43 @@ export async function getStaticProps(context) {
       notFound: true,
     };
   }
-
+  const did = Number.parseInt(context.params.did);
+  const discussion = await getDiscussionByDID(did);
+  //console.log(discussion);
+  if (!discussion){
+      return {
+          notFound: true,
+      }
+  }
   return {
     props: {
       courseId: id,
       courseName: name,
+      discussionId: did,
     },
   };
 }
 
-function Discussion({ courseId, courseName }) {
+function Discussion({ courseId, courseName, discussionId }) {
     // eslint-disable-next-line no-unused-vars
-    const { data, error } = useSWR(`/api/discussion/${courseId}`, fetcher);
-
-    let discussionList;
+    const data = fetch("/api/discussion", {
+        body: JSON.stringify({
+            action: "content",
+            payload: {
+                courseId: courseId,
+                discussionId: discussionId,
+            },
+        }),
+        headers: {
+            "Content-Type": "application/json",
+        },
+        method: "POST",
+    }).then((x) => x.json());
+    console.log(data);
+    
+    let discussionContentList;
     if (!data) {
-      discussionList = (
+        discussionContentList = (
         <Box display="flex" flexDirection="column" alignItems="center">
           <CircularProgress />
           <Box mt="10px">
@@ -57,33 +78,37 @@ function Discussion({ courseId, courseName }) {
         </Box>
       );
     } else {
-      const discussionItems = data.map((discussion) => (
-        <ListItem key={discussion.discussionid}>
+      //console.log(data);
+      const discussionContentItems = null;
+      /*
+      const discussionContentItems = data.map((discussionContent) => (
+        <ListItem key={discussionContent}>
           <Box width="100%">
             <Card>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
-                  Discussion {discussion.discussionid}
+                  Thread {discussionContent.postid}
                 </Typography>
                 <Typography color="textSecondary">
-                  Create User: {discussion.userid}
+                  Create User: {discussionContent.userid}
                 </Typography>
                 <Typography color="textSecondary">
-                  Create Date: {discussion.createdate}
+                  Create Date: {discussionContent.createdate}
                 </Typography>
-                <Typography>{discussion.theme}</Typography>
+                <Typography>{discussionContent.content}</Typography>
               </CardContent>
               <CardActions>
                 <Button size="small" color="primary">
-                  <Link href={`/discussion/${courseId}/${discussion.discussionid}`}>Enter</Link>
+                  {" "}
+                  Create Thread{" "}
                 </Button>
               </CardActions>
             </Card>
           </Box>
         </ListItem>
       ));
-  
-      discussionList = <List>{discussionItems}</List>;
+      */
+      discussionContentList = <List>{discussionContentItems}</List>;
     }
 
 
@@ -131,7 +156,7 @@ function Discussion({ courseId, courseName }) {
           p="10px"
           minHeight="500px"
         >
-          {discussionList}
+            {discussionContentList}
         </Box>
       </Container>
     </div>
@@ -141,6 +166,7 @@ function Discussion({ courseId, courseName }) {
 Discussion.propTypes = {
   courseId: PropTypes.number.isRequired,
   courseName: PropTypes.string.isRequired,
+  discussionId: PropTypes.number.isRequired,
 };
 
 export default Discussion;
