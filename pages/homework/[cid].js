@@ -68,6 +68,14 @@ function Homework({ courseId, courseName }) {
   });
   const [submissionContent, setSubmissionContent] = useState("");
 
+  const C_STATE_CLOSED = 0;
+  const C_STATE_LOADING = 1;
+  const C_STATE_PREPARED = 2;
+  const C_STATE_SUBMITTING = 3;
+  const [c_state, setC_State] = useState(false);
+  const [newHomework, setNewHomework] = useState(0);
+  const [assignDate, setAssignDate] = useState(new Date().toISOString().split("T")[0]);
+  const [dueDate, setDueDate] = useState(new Date().toISOString().split("T")[0]);
   const prepareSubmission = (homework) => {
     if (homework.homeworkid !== currentHomework.id) {
       setCurrentHomework({
@@ -125,6 +133,44 @@ function Homework({ courseId, courseName }) {
     }
   };
 
+  const prepareHomework = () =>{
+    setC_State(C_STATE_PREPARED);
+  };
+  const performHomework = () =>{
+    setC_State(C_STATE_SUBMITTING);
+    setMessage("Processing...");
+    fetch(
+      "/api/homework?action=createHomework",
+      {
+        body: JSON.stringify({
+        courseId: courseId,
+        homeworkId: parseInt(newHomework),
+        content: submissionContent,
+        assign: assignDate,
+        due: dueDate,
+        }), 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      }
+    )
+      .then((x) => x.json())
+      .then((res) => {
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          setMessage(res.msg);
+        }
+        setC_State(C_STATE_PREPARED);
+      });
+  };
+  const handleHomeworkClose = () => {
+    if (c_state === C_STATE_PREPARED) {
+      setC_State(C_STATE_CLOSED);
+    }
+  };
+
   let homeworkList;
   if (!data) {
     homeworkList = (
@@ -136,6 +182,7 @@ function Homework({ courseId, courseName }) {
       </Box>
     );
   } else {
+    if(data.user.identity === 0){
     const homeworkItems = data.homework.map((homework) => (
       <ListItem key={homework.homeworkid}>
         <Box width="100%">
@@ -167,6 +214,43 @@ function Homework({ courseId, courseName }) {
     ));
 
     homeworkList = <List>{homeworkItems}</List>;
+    }
+    else{
+      const homeworkItems = data.homework.map((homework) => (
+        <ListItem key={homework.homeworkid}>
+          <Box width="100%">
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Homework {homework.homeworkid}
+                </Typography>
+                <Typography color="textSecondary">
+                  Assign Date: {homework.assign}
+                </Typography>
+                <Typography color="textSecondary">
+                  Due Date: {homework.due}
+                </Typography>
+                <Typography>{homework.content}</Typography>
+              </CardContent>
+              <CardActions>
+                <Button
+                  size="small"
+                  color="primary"
+                >
+                  <Link
+                      href={`/homework/${courseId}/${homework.homeworkid}`}
+                  >
+                  Check Submission
+                  </Link>
+                </Button>
+              </CardActions>
+            </Card>
+          </Box>
+        </ListItem>
+      ));
+  
+      homeworkList = <List>{homeworkItems}</List>;
+    }
   }
 
   let dialogContent;
@@ -195,6 +279,27 @@ function Homework({ courseId, courseName }) {
         ></TextField>
         <DialogContentText color="secondary">{message}</DialogContentText>
       </React.Fragment>
+    );
+  }
+  let createHomework;
+  if (data && data.user.identity ===1){
+    createHomework = (
+      <Box mx="10px" px="10px" pt="10px" mt="10px" 
+        display="flex" 
+        component="span"
+        justifyContent="space-between" 
+        alignItems="center"
+      >
+        <Button
+          size="Small"
+          color="primary"
+          variant="contained" 
+          alignItems="left"
+          onClick={prepareHomework}
+        >
+          Add Homework
+        </Button>
+      </Box>
     );
   }
 
@@ -229,6 +334,7 @@ function Homework({ courseId, courseName }) {
         >
           {homeworkList}
         </Box>
+        {createHomework}
       </Container>
       <Dialog
         open={state > STATE_CLOSED}
@@ -245,6 +351,83 @@ function Homework({ courseId, courseName }) {
             onClick={performSubmission}
           >
             Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={c_state > C_STATE_CLOSED}
+        onClose={handleHomeworkClose}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>Creating homework</DialogTitle>
+        <DialogContent>
+          <React.Fragment>
+          <DialogContentText>Please assign new homework:</DialogContentText>
+          <DialogContentText>
+            <TextField
+              //variant="outlined"
+              rows="1"
+              placeholder="New Homework ID"
+              value={newHomework}
+              InputProps={{
+                inputProps: { 
+                    min: 1
+                }
+              }}
+              onChange={(e) => setNewHomework(e.target.value)}
+              autoFocus
+              fullWidth
+              label="Homework ID"
+              type="number"
+            />
+        </DialogContentText>
+          <TextField
+            variant="outlined"
+            rows="10"
+            placeholder="Assign your homework here..."
+            value={submissionContent}
+            onChange={(e) => setSubmissionContent(e.target.value)}
+            autoFocus
+            multiline
+            fullWidth
+          ></TextField>
+          <DialogContentText>
+            <TextField
+              id="assignDate"
+              label="Assign"
+              type="date"
+              defaultValue={new Date().toISOString().split("T")[0]}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={assignDate}
+              onChange={(e) => setAssignDate(e.target.value)}
+            />
+        </DialogContentText>
+        <DialogContentText>
+            <TextField
+              id="dueDate"
+              label="Due"
+              type="date"
+              defaultValue={new Date().toISOString().split("T")[0]}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+        </DialogContentText>
+          <DialogContentText color="secondary">{message}</DialogContentText>
+          </React.Fragment>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="primary"
+            disabled={c_state !== C_STATE_PREPARED}
+            onClick={performHomework}
+          >
+            Create
           </Button>
         </DialogActions>
       </Dialog>

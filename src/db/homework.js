@@ -1,6 +1,22 @@
 import { pool } from "./common";
 import { sql } from "slonik";
 
+export async function getHomework(cid, hid) {
+    if (typeof cid !== "number"||
+    typeof hid !== "number") {
+        return null;
+    }
+    if (isNaN(cid) || isNaN(hid)) {
+        return null;
+    }
+  const result = await pool.connect(async (connection) => {
+    const data = await connection.query(sql`SELECT * FROM homework
+    WHERE courseid=${cid} AND homeworkid=${hid};`);
+    return data;
+  });
+  return result.rows;
+}
+
 export async function getHomeworkList(cid, uid) {
   if (typeof cid !== "number") {
     return null;
@@ -15,7 +31,8 @@ export async function getHomeworkList(cid, uid) {
         FROM homework LEFT OUTER JOIN submission
           USING (homeworkid, courseid)
         WHERE courseid = ${cid}
-          AND (userid = ${uid} OR userid IS NULL)`
+          AND (userid = ${uid} OR userid IS NULL)
+        ORDER BY homework.homeworkid ASC;`
     );
     return data;
   });
@@ -83,6 +100,29 @@ export async function insertSubmission(cid, hid, uid, content) {
 
   return result.rowCount === 1;
 }
+
+export async function insertNewHomework(cid, hid, content, assign, due) {
+    if (
+      typeof cid !== "number" ||
+      typeof hid !== "number" ||
+      typeof content !== "string" ||
+      isNaN(cid) ||
+      isNaN(hid)
+    ) {
+      return false;
+    }
+  
+    const result = await pool.connect(async (connection) => {
+      const data = await connection.query(
+        sql`INSERT
+          INTO homework (courseid, homeworkid, content, assign, due)
+          VALUES (${cid}, ${hid}, ${content}, ${assign}, ${due});`
+      );
+      return data;
+    });
+  
+    return result.rowCount === 1;
+  }
 
 export async function updateSubmission(cid, hid, uid, content) {
   if (

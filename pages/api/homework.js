@@ -2,8 +2,10 @@ import { withSession } from "../../src/session";
 import {
   getHomeworkList,
   getSubmission,
+  getHomework,
   updateSubmission,
   insertSubmission,
+  insertNewHomework,
 } from "../../src/db/homework";
 
 async function handleList(req, res) {
@@ -76,6 +78,36 @@ async function handleReview(req, res) {
   };
 }
 
+async function handleCreateHomework(req, res) {
+    const user = req.session.get("user");
+    if (!user) {
+      return {
+        ok: false,
+        msg: "Not logged in",
+      };
+    }
+    if (parseInt(user.identity) !== 1){
+        return {
+            ok: false,
+            msg: "No privilege",
+        };
+    }
+
+    const payload = req.body;
+    const homework = await getHomework(payload.courseId, payload.homeworkId);
+    if(homework.length > 0){
+        return {
+            ok: false,
+            msg: "Homework ID already used",
+        };
+    }
+    let ok;
+    ok = await insertNewHomework(payload.courseId,payload.homeworkId, payload.content,payload.assign, payload.due);
+    return {
+        ok: ok,
+    };
+  }
+
 function dispatch(req) {
   if (req.query.action === "list") {
     if (req.method !== "GET" || typeof req.query.cid !== "string") {
@@ -105,7 +137,16 @@ function dispatch(req) {
     return null;
   } else if (req.query.action === "score") {
     return null;
-  } else {
+  } else if (req.query.action === "createHomework"){
+    if (
+        req.method !== "POST" ||
+        typeof req.body.courseId !== "number" ||
+        typeof req.body.homeworkId !== "number" ||
+        typeof req.body.content !== "string"
+    ) {return null;}
+    return handleCreateHomework;
+  }
+  else {
     return null;
   }
 }
