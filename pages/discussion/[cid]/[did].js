@@ -94,10 +94,21 @@ function Discussion({ courseId, courseName, discussionId }) {
               <Typography>{discussionContent.content}</Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" color="primary">
-                {" "}
-                Create Thread{" "}
-              </Button>
+              <Box 
+                display="flex" 
+                component="span"
+                justifyContent="space-between" 
+                alignItems="center"
+              >
+                <Button
+                  size="Small"
+                  color="primary"
+                  variant="contained" 
+                  alignItems="left"
+                  >
+                  Delete
+                </Button>
+              </Box>
             </CardActions>
           </Card>
         </Box>
@@ -136,6 +147,21 @@ function Discussion({ courseId, courseName, discussionId }) {
           minHeight="500px"
         >
           {discussionContentList}
+        </Box>
+        <Box mx="10px" px="10px" pt="10px" mt="10px" 
+          display="flex" 
+          component="span"
+          justifyContent="space-between" 
+          alignItems="center"
+        >
+          <Button
+            size="Small"
+            color="primary"
+            variant="contained" 
+            alignItems="left"
+          >
+            Create Thread
+          </Button>
         </Box>
       </Container>
     </div>

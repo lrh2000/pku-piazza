@@ -84,4 +84,4 @@ INSERT
   INTO
     public.submission (courseid, homeworkid, userid, content)
   VALUES
-    (2, 1, 1, "985");
+    (2, 1, 1, '985');

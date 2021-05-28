@@ -44,7 +44,25 @@ export async function getStaticProps(context) {
 
 function Discussion({ courseId, courseName }) {
   const { data } = useSWR(`/api/discussion/${courseId}`, fetcher);
+  
+  const STATE_CLOSED = 0;
+  const STATE_LOADING = 1;
+  const STATE_PREPARED = 2;
+  const STATE_SUBMITTING = 3;
+  const [state, setState] = useState(false);
+  const [submissionContent, setSubmissionContent] = useState("");
+  const [message, setMessage] = useState("\u200b");
+  const [currentDiscussion, setCurrentHomework] = useState({
+    courseid: 0,
+    createdate: "",
+    description: "",
+  });
 
+  const handleClose = () => {
+    if (state === STATE_PREPARED) {
+      setState(STATE_CLOSED);
+    }
+  };
   let discussionList;
   if (!data) {
     discussionList = (
@@ -73,13 +91,31 @@ function Discussion({ courseId, courseName }) {
               <Typography>{discussion.theme}</Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" color="primary">
-                <Link
-                  href={`/discussion/${courseId}/${discussion.discussionid}`}
+              <Box 
+                display="flex" 
+                component="span"
+                justifyContent="space-between" 
+                alignItems="center"
+              >
+                <Button 
+                  size="Small" 
+                  color="primary" 
+                  alignItems="left"
                 >
-                  Enter
-                </Link>
-              </Button>
+                  <Link
+                    href={`/discussion/${courseId}/${discussion.discussionid}`}
+                  >
+                    Enter
+                  </Link>
+                </Button>
+                <Button 
+                  size="Small" 
+                  color="primary" 
+                  alignItems="right"
+                >
+                  Delete
+                </Button>
+              </Box>
             </CardActions>
           </Card>
         </Box>
@@ -88,7 +124,34 @@ function Discussion({ courseId, courseName }) {
 
     discussionList = <List>{discussionItems}</List>;
   }
-
+  let dialogContent;
+  if (state === STATE_LOADING) {
+    dialogContent = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <CircularProgress />
+        <Box mt="10px">
+          <Typography variant="h5"> Loading... </Typography>
+        </Box>
+      </Box>
+    );
+  } else {
+    dialogContent = (
+      <React.Fragment>
+        <DialogContentText>New Discussion</DialogContentText>
+        <TextField
+          variant="outlined"
+          rows="10"
+          placeholder="Writing your theme here..."
+          value={submissionContent}
+          onChange={(e) => setSubmissionContent(e.target.value)}
+          autoFocus
+          multiline
+          fullWidth
+        ></TextField>
+        <DialogContentText color="secondary">{message}</DialogContentText>
+      </React.Fragment>
+    );
+  }
   return (
     <div>
       <Header title={`${courseName}: Discussion`} data={data} />
@@ -120,7 +183,41 @@ function Discussion({ courseId, courseName }) {
         >
           {discussionList}
         </Box>
+        <Box mx="10px" px="10px" pt="10px" mt="10px" 
+          display="flex" 
+          component="span"
+          justifyContent="space-between" 
+          alignItems="center"
+        >
+          <Button
+            size="Small"
+            color="primary"
+            variant="contained" 
+            alignItems="left"
+            onClick={""}
+          >
+            Create Discussion
+          </Button>
+        </Box>
       </Container>
+      <Dialog
+        open={state > STATE_CLOSED}
+        onClose={handleClose}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>Creating discussion</DialogTitle>
+        <DialogContent>{dialogContent}</DialogContent>
+        <DialogActions>
+          <Button
+            color="primary"
+            disabled={state !== STATE_PREPARED}
+            onClick={""}
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
