@@ -19,7 +19,11 @@ export async function getDiscussionByCID(cid) {
 
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
-      sql`SELECT * FROM discussion WHERE courseid = ${cid}`
+        sql`SELECT courseid, discussionid, userid, createdate, theme, name, identity
+        FROM discussion JOIN users
+        ON discussion.userid = users.id
+        WHERE courseid = ${cid}
+        ORDER BY discussion.discussionid DESC;`
     );
     return data;
   });
@@ -37,7 +41,11 @@ export async function getDiscussionByDID(did) {
   }
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
-      sql`SELECT * FROM discussion WHERE discussionid = ${did}`
+        sql`SELECT courseid, discussionid, userid, createdate, theme, name, identity
+        FROM discussion JOIN users
+        ON discussion.userid = users.id
+        WHERE discussionid = ${did}
+        ORDER BY discussion.discussionid DESC;`
     );
     return data;
   });
@@ -55,7 +63,11 @@ export async function getDiscussionContentByDID(did) {
   }
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
-      sql`SELECT * FROM discussionContent WHERE discussionid = ${did}`
+        sql`SELECT discussionid, postid, userid, createdate, content, name, identity
+        FROM discussionContent JOIN users
+        ON discussionContent.userid = users.id
+        WHERE discussionid = ${did}
+        ORDER BY discussionContent.postid ASC;`
     );
     return data;
   });

@@ -173,7 +173,10 @@ function Discussion({ courseId, courseName, discussionId }) {
       setState(STATE_CLOSED);
     }
   };
-
+  const mapIdentity = (identity) => {
+    if (identity === 0) {return "Student";}
+    if (identity === 1) {return "Faculty";}
+  }
   let discussionContentList;
   if (!data) {
     discussionContentList = (
@@ -186,16 +189,22 @@ function Discussion({ courseId, courseName, discussionId }) {
     );
   } else {
     if (data.user.identity === 1){
-        const discussionContentItems = data.content.map((discussionContent) => (
+        const discussionContentItems = data.content.map((discussionContent, i) => (
             <ListItem key={discussionContent}>
               <Box width="100%">
                 <Card>
                   <CardContent>
                     <Typography variant="h5" gutterBottom>
-                      Thread {discussionContent.postid}
+                      Thread {i+1}
                     </Typography>
                     <Typography color="textSecondary">
-                      Create User: {discussionContent.userid}
+                        Create User: {discussionContent.name}
+                    </Typography>
+                    <Typography color="textSecondary">
+                        ID: {discussionContent.userid}
+                    </Typography>
+                    <Typography color="textSecondary">
+                        Identity: {mapIdentity(discussionContent.identity)}
                     </Typography>
                     <Typography color="textSecondary">
                       Create Date: {discussionContent.createdate}
@@ -226,16 +235,19 @@ function Discussion({ courseId, courseName, discussionId }) {
         ));
         discussionContentList = <List>{discussionContentItems}</List>;
     }else{
-        const discussionContentItems = data.content.map((discussionContent) => (
+        const discussionContentItems = data.content.map((discussionContent,i) => (
             <ListItem key={discussionContent}>
               <Box width="100%">
                 <Card>
                   <CardContent>
                     <Typography variant="h5" gutterBottom>
-                      Thread {discussionContent.postid}
+                      Thread {i+1}
                     </Typography>
                     <Typography color="textSecondary">
-                      Create User: {discussionContent.userid}
+                        Create User: {discussionContent.name}
+                    </Typography>
+                    <Typography color="textSecondary">
+                        Identity: {mapIdentity(discussionContent.identity)}
                     </Typography>
                     <Typography color="textSecondary">
                       Create Date: {discussionContent.createdate}

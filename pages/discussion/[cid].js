@@ -156,6 +156,10 @@ function Discussion({ courseId, courseName }) {
       setState(STATE_CLOSED);
     }
   };
+  const mapIdentity = (identity) => {
+    if (identity === 0) {return "Student";}
+    if (identity === 1) {return "Faculty";}
+  }
   let discussionList;
   if (!data) {
     discussionList = (
@@ -168,16 +172,22 @@ function Discussion({ courseId, courseName }) {
     );
   } else {
     if (data.user.identity === 1){
-    const discussionItems = data.discussion.map((discussion) => (
+    const discussionItems = data.discussion.map((discussion, i) => (
       <ListItem key={discussion.discussionid}>
         <Box width="100%">
           <Card>
             <CardContent>
               <Typography variant="h5" gutterBottom>
-                Discussion {discussion.discussionid}
+                Discussion {i+1}
               </Typography>
               <Typography color="textSecondary">
-                Create User: {discussion.userid}
+                Create User: {discussion.name}
+              </Typography>
+              <Typography color="textSecondary">
+                ID: {discussion.userid}
+              </Typography>
+              <Typography color="textSecondary">
+                Identity: {mapIdentity(discussion.identity)}
               </Typography>
               <Typography color="textSecondary">
                 Create Date: {discussion.createdate}
@@ -219,16 +229,19 @@ function Discussion({ courseId, courseName }) {
 
     discussionList = <List>{discussionItems}</List>;
     }else{
-      const discussionItems = data.discussion.map((discussion) => (
+      const discussionItems = data.discussion.map((discussion,i) => (
         <ListItem key={discussion.discussionid}>
           <Box width="100%">
             <Card>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
-                  Discussion {discussion.discussionid}
+                  Discussion {i+1}
                 </Typography>
                 <Typography color="textSecondary">
-                  Create User: {discussion.userid}
+                  Create User: {discussion.name}
+                </Typography>
+                <Typography color="textSecondary">
+                  Identity: {mapIdentity(discussion.identity)}
                 </Typography>
                 <Typography color="textSecondary">
                   Create Date: {discussion.createdate}
