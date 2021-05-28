@@ -23,7 +23,7 @@ CREATE TABLE public.discussionContent(
   discussionid INTEGER NOT NULL,
   postid SERIAL,
   createdate DATE,
-  useid INTEGER NOT NULL,
+  userid INTEGER NOT NULL,
   content TEXT
 );
 
@@ -67,7 +67,7 @@ INSERT
 
 INSERT
   INTO
-    public.discussionContent (discussionid, postid, createdate, useid, content)
+    public.discussionContent (discussionid, postid, createdate, userid, content)
   VALUES
     (1, DEFAULT, '2021-05-27', 1, 'What is the difference between cache coherence and memory consistency?');
 

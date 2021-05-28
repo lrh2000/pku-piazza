@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import PropTypes from "prop-types";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
@@ -12,6 +12,12 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
+import TextField from "@material-ui/core/TextField";
 import Header from "../../src/ui/Header";
 import useSWR from "swr";
 
@@ -52,13 +58,100 @@ function Discussion({ courseId, courseName }) {
   const [state, setState] = useState(false);
   const [submissionContent, setSubmissionContent] = useState("");
   const [message, setMessage] = useState("\u200b");
-  const [currentDiscussion, setCurrentHomework] = useState({
-    courseid: 0,
-    createdate: "",
-    description: "",
-  });
 
-  const handleClose = () => {
+  const D_STATE_CLOSED = 0;
+  const D_STATE_LOADING = 1;
+  const D_STATE_PREPARED = 2;
+  const D_STATE_DELETING = 3;
+  const [d_state, setD_state] = useState(false);
+  const [currentDiscussion, setCurrentDiscussion] = useState({
+    courseid: 0,
+    discussionid: 0,
+  });
+  const prepareDelete = (discussion) => {
+    if (discussion.discussionid !== currentDiscussion.discussionid ||
+        discussion.courseid !== currentDiscussion.courseid
+        ) {
+          setCurrentDiscussion({
+          courseid: discussion.courseid,
+          discussionid: discussion.discussionid,
+        });
+        setMessage("");
+      }
+    setD_state(D_STATE_PREPARED);
+  };
+  const performDelete = () => {
+    setD_state(D_STATE_DELETING);
+    setMessage("Processing...");
+    fetch(
+        "/api/discussion",
+        {
+          body: JSON.stringify({
+            action: "deleteDiscussion",
+            payload: {
+              courseId: currentDiscussion.courseid,
+              discussionId: currentDiscussion.discussionid,
+            },
+          }), 
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+        }
+    )
+      .then((x) => x.json())
+      .then((res) => {
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          setMessage(res.msg);
+        }
+        setD_state(D_STATE_PREPARED);
+      });
+      window.location.reload();
+      setD_state(D_STATE_PREPARED);
+  };
+
+  const handleDeleteClose = () => {
+    if (d_state === D_STATE_PREPARED) {
+      setD_state(D_STATE_CLOSED);
+    }
+  };
+
+
+  const prepareSubmission = () =>{
+    setState(STATE_PREPARED);
+  };
+  const performSubmission = () =>{
+    setState(STATE_SUBMITTING);
+    setMessage("Processing...");
+    fetch(
+      "/api/discussion",
+      {
+        body: JSON.stringify({
+          action: "submitDiscussion",
+          payload: {
+            courseId: courseId,
+            theme: submissionContent,
+          },
+        }), 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      }
+    )
+      .then((x) => x.json())
+      .then((res) => {
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          setMessage(res.msg);
+        }
+        setState(STATE_PREPARED);
+      });
+  };
+  const handleSubmissionClose = () => {
     if (state === STATE_PREPARED) {
       setState(STATE_CLOSED);
     }
@@ -74,6 +167,7 @@ function Discussion({ courseId, courseName }) {
       </Box>
     );
   } else {
+    if (data.user.identity === 1){
     const discussionItems = data.discussion.map((discussion) => (
       <ListItem key={discussion.discussionid}>
         <Box width="100%">
@@ -112,6 +206,7 @@ function Discussion({ courseId, courseName }) {
                   size="Small" 
                   color="primary" 
                   alignItems="right"
+                  onClick={() => prepareDelete(discussion)}
                 >
                   Delete
                 </Button>
@@ -123,6 +218,50 @@ function Discussion({ courseId, courseName }) {
     ));
 
     discussionList = <List>{discussionItems}</List>;
+    }else{
+      const discussionItems = data.discussion.map((discussion) => (
+        <ListItem key={discussion.discussionid}>
+          <Box width="100%">
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Discussion {discussion.discussionid}
+                </Typography>
+                <Typography color="textSecondary">
+                  Create User: {discussion.userid}
+                </Typography>
+                <Typography color="textSecondary">
+                  Create Date: {discussion.createdate}
+                </Typography>
+                <Typography>{discussion.theme}</Typography>
+              </CardContent>
+              <CardActions>
+                <Box 
+                  display="flex" 
+                  component="span"
+                  justifyContent="space-between" 
+                  alignItems="center"
+                >
+                  <Button 
+                    size="Small" 
+                    color="primary" 
+                    alignItems="left"
+                  >
+                    <Link
+                      href={`/discussion/${courseId}/${discussion.discussionid}`}
+                    >
+                      Enter
+                    </Link>
+                  </Button>
+                </Box>
+              </CardActions>
+            </Card>
+          </Box>
+        </ListItem>
+      ));
+  
+      discussionList = <List>{discussionItems}</List>;
+    }
   }
   let dialogContent;
   if (state === STATE_LOADING) {
@@ -137,7 +276,7 @@ function Discussion({ courseId, courseName }) {
   } else {
     dialogContent = (
       <React.Fragment>
-        <DialogContentText>New Discussion</DialogContentText>
+        <DialogContentText>The theme of this new dicussion is: </DialogContentText>
         <TextField
           variant="outlined"
           rows="10"
@@ -194,7 +333,7 @@ function Discussion({ courseId, courseName }) {
             color="primary"
             variant="contained" 
             alignItems="left"
-            onClick={""}
+            onClick={prepareSubmission}
           >
             Create Discussion
           </Button>
@@ -202,7 +341,7 @@ function Discussion({ courseId, courseName }) {
       </Container>
       <Dialog
         open={state > STATE_CLOSED}
-        onClose={handleClose}
+        onClose={handleSubmissionClose}
         maxWidth="lg"
         fullWidth
       >
@@ -212,9 +351,38 @@ function Discussion({ courseId, courseName }) {
           <Button
             color="primary"
             disabled={state !== STATE_PREPARED}
-            onClick={""}
+            onClick={performSubmission}
           >
             Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={d_state > D_STATE_CLOSED}
+        onClose={handleDeleteClose}
+        maxWidth="lg"
+      >
+        <DialogTitle>Deleting this discussion?</DialogTitle>
+        <DialogContent>
+        <DialogContentText color="secondary">{message}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="primary"
+            disabled={d_state !== D_STATE_PREPARED}
+            onClick={performDelete}
+            alignItems="left"
+          >
+            Yes
+          </Button>
+          <Button
+            color="primary"
+            disabled={d_state !== D_STATE_PREPARED}
+            onClick={()=>{window.location.reload();
+                setD_state(D_STATE_PREPARED);}}
+            alignItems="right"
+          >
+            No
           </Button>
         </DialogActions>
       </Dialog>
