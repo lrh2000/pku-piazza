@@ -2,6 +2,7 @@ import { withSession } from "../../src/session";
 import {
   getHomeworkList,
   getSubmission,
+  getSubmissionList,
   getHomework,
   updateSubmission,
   insertSubmission,
@@ -26,6 +27,27 @@ async function handleList(req, res) {
     homework: homework,
   };
 }
+
+async function handleSubmissionList(req, res) {
+    const user = req.session.get("user");
+    if (!user) {
+      return {
+        ok: false,
+        msg: "Not logged in",
+        homework: [],
+      };
+    }
+  
+    const cid = Number.parseInt(req.query.cid);
+    const hid = Number.parseInt(req.query.hid);
+
+    const submissions = await getSubmissionList(cid, hid);
+    return {
+      ok: true,
+      user: user,
+      submissions: submissions,
+    };
+  }
 
 async function handleSubmit(req, res) {
   const user = req.session.get("user");
@@ -114,7 +136,13 @@ function dispatch(req) {
       return null;
     }
     return handleList;
-  } else if (req.query.action === "submit") {
+  }else if (req.query.action === "submissionList"){
+    if (req.method !== "GET" || typeof req.query.cid !== "string"
+    || typeof req.query.hid !== "string") {
+        return null;
+    }
+    return handleSubmissionList;
+  }else if (req.query.action === "submit") {
     if (
       req.method !== "POST" ||
       typeof req.query.cid !== "string" ||

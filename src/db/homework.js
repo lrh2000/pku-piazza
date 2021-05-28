@@ -76,6 +76,31 @@ export async function getSubmission(cid, hid, uid) {
   return rows[0].content;
 }
 
+export async function getSubmissionList(cid, hid) {
+    if (
+      typeof cid !== "number" ||
+      typeof hid !== "number" ||
+      isNaN(cid) ||
+      isNaN(hid)
+    ) {
+      return null;
+    }
+  
+    const result = await pool.connect(async (connection) => {
+      const data = await connection.query(
+        sql`SELECT courseid, homeworkid, userid, content, name, identity
+          FROM submission JOIN users
+          ON submission.userid = users.id
+          WHERE courseid = ${cid}
+            AND homeworkid = ${hid};`
+      );
+      return data;
+    });
+  
+    const rows = result.rows;
+    return rows;
+  }
+
 export async function insertSubmission(cid, hid, uid, content) {
   if (
     typeof cid !== "number" ||
