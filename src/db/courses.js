@@ -3,7 +3,9 @@ import { sql } from "slonik";
 
 export async function getCourseList() {
   const result = await pool.connect(async (connection) => {
-    const data = await connection.query(sql`SELECT * FROM courses`);
+    const data = await connection.query(
+      sql`SELECT courseid, name FROM Courses`
+    );
     return data;
   });
   return result.rows;
@@ -19,7 +21,7 @@ export async function getCourseName(cid) {
 
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
-      sql`SELECT name FROM courses WHERE id = ${cid}`
+      sql`SELECT name FROM Courses WHERE courseid = ${cid}`
     );
     return data;
   });

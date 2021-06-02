@@ -14,7 +14,7 @@ export async function getUserByName(name) {
 
   const result = await pool.connect(async (connection) => {
     const data = connection.query(
-      sql`SELECT * FROM users WHERE name = ${name}`
+      sql`SELECT * FROM Users WHERE name = ${name}`
     );
     return data;
   });
@@ -45,9 +45,9 @@ export async function setUser(name, password, identity) {
   const result = await pool.connect(async (connection) => {
     const data = connection.query(
       sql`INSERT
-        INTO users (id, name, password, identity, salt)
-        VALUES (DEFAULT, ${name}, ${key}, ${identity}, ${salt})
-        RETURNING id`
+            INTO Users (userid, name, password, identity, salt)
+            VALUES (DEFAULT, ${name}, ${key}, ${identity}, ${salt})
+            RETURNING userid`
     );
     return data;
   });
@@ -57,7 +57,7 @@ export async function setUser(name, password, identity) {
     return null;
   }
   return {
-    id: rows[0].id,
+    userid: rows[0].userid,
     name: name,
     identity: identity,
   };

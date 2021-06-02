@@ -28,4 +28,4 @@ Finally, start the server for development by:
 npm run dev
 ```
 
-But before this, make sure the PostgreSQL database has been configured according to `src/db/courses.js` and initialized with `sql/init.sql`.
+But before this, make sure the PostgreSQL database has been configured according to `src/db/common.js` and initialized with `sql/init.sql`.

@@ -21,7 +21,7 @@ async function handleLogin(req, res) {
   }
 
   req.session.set("user", {
-    id: user.id,
+    id: user.userid,
     name: user.name,
     identity: user.identity,
   });
@@ -53,7 +53,7 @@ async function handleSignup(req, res) {
   );
 
   req.session.set("user", {
-    id: newuser.id,
+    id: newuser.userid,
     name: newuser.name,
     identity: newuser.identity,
   });

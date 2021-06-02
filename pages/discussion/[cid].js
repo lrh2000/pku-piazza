@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
@@ -50,7 +50,7 @@ export async function getStaticProps(context) {
 
 function Discussion({ courseId, courseName }) {
   const { data } = useSWR(`/api/discussion/${courseId}`, fetcher);
-  
+
   const STATE_CLOSED = 0;
   const STATE_LOADING = 1;
   const STATE_PREPARED = 2;
@@ -60,45 +60,42 @@ function Discussion({ courseId, courseName }) {
   const [message, setMessage] = useState("\u200b");
 
   const D_STATE_CLOSED = 0;
-  const D_STATE_LOADING = 1;
-  const D_STATE_PREPARED = 2;
-  const D_STATE_DELETING = 3;
-  const [d_state, setD_state] = useState(false);
+  const D_STATE_PREPARED = 1;
+  const D_STATE_DELETING = 2;
+  const [dState, setDState] = useState(false);
   const [currentDiscussion, setCurrentDiscussion] = useState({
     courseid: 0,
     discussionid: 0,
   });
   const prepareDelete = (discussion) => {
-    if (discussion.discussionid !== currentDiscussion.discussionid ||
-        discussion.courseid !== currentDiscussion.courseid
-        ) {
-          setCurrentDiscussion({
-          courseid: discussion.courseid,
-          discussionid: discussion.discussionid,
-        });
-        setMessage("");
-      }
-    setD_state(D_STATE_PREPARED);
+    if (
+      discussion.discussionid !== currentDiscussion.discussionid ||
+      discussion.courseid !== currentDiscussion.courseid
+    ) {
+      setCurrentDiscussion({
+        courseid: discussion.courseid,
+        discussionid: discussion.discussionid,
+      });
+      setMessage("");
+    }
+    setDState(D_STATE_PREPARED);
   };
   const performDelete = () => {
-    setD_state(D_STATE_DELETING);
+    setDState(D_STATE_DELETING);
     setMessage("Processing...");
-    fetch(
-        "/api/discussion",
-        {
-          body: JSON.stringify({
-            action: "deleteDiscussion",
-            payload: {
-              courseId: currentDiscussion.courseid,
-              discussionId: currentDiscussion.discussionid,
-            },
-          }), 
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-        }
-    )
+    fetch("/api/discussion", {
+      body: JSON.stringify({
+        action: "deleteDiscussion",
+        payload: {
+          courseId: currentDiscussion.courseid,
+          discussionId: currentDiscussion.discussionid,
+        },
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
       .then((x) => x.json())
       .then((res) => {
         if (res.ok) {
@@ -106,41 +103,37 @@ function Discussion({ courseId, courseName }) {
         } else {
           setMessage(res.msg);
         }
-        setD_state(D_STATE_PREPARED);
+        setDState(D_STATE_PREPARED);
       });
-      window.location.reload();
-      setD_state(D_STATE_PREPARED);
+    window.location.reload();
+    setDState(D_STATE_PREPARED);
   };
 
   const handleDeleteClose = () => {
-    if (d_state === D_STATE_PREPARED) {
-      setD_state(D_STATE_CLOSED);
+    if (dState === D_STATE_PREPARED) {
+      setDState(D_STATE_CLOSED);
     }
   };
 
-
-  const prepareSubmission = () =>{
+  const prepareSubmission = () => {
     setState(STATE_PREPARED);
   };
-  const performSubmission = () =>{
+  const performSubmission = () => {
     setState(STATE_SUBMITTING);
     setMessage("Processing...");
-    fetch(
-      "/api/discussion",
-      {
-        body: JSON.stringify({
-          action: "submitDiscussion",
-          payload: {
-            courseId: courseId,
-            theme: submissionContent,
-          },
-        }), 
-        headers: {
-          "Content-Type": "application/json",
+    fetch("/api/discussion", {
+      body: JSON.stringify({
+        action: "submitDiscussion",
+        payload: {
+          courseId: courseId,
+          theme: submissionContent,
         },
-        method: "POST",
-      }
-    )
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
       .then((x) => x.json())
       .then((res) => {
         if (res.ok) {
@@ -157,9 +150,13 @@ function Discussion({ courseId, courseName }) {
     }
   };
   const mapIdentity = (identity) => {
-    if (identity === 0) {return "Student";}
-    if (identity === 1) {return "Faculty";}
-  }
+    if (identity === 0) {
+      return "Student";
+    }
+    if (identity === 1) {
+      return "Faculty";
+    }
+  };
   let discussionList;
   if (!data) {
     discussionList = (
@@ -171,71 +168,66 @@ function Discussion({ courseId, courseName }) {
       </Box>
     );
   } else {
-    if (data.user.identity === 1){
-    const discussionItems = data.discussion.map((discussion, i) => (
-      <ListItem key={discussion.discussionid}>
-        <Box width="100%">
-          <Card>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Discussion {i+1}
-              </Typography>
-              <Typography color="textSecondary">
-                Create User: {discussion.name}
-              </Typography>
-              <Typography color="textSecondary">
-                ID: {discussion.userid}
-              </Typography>
-              <Typography color="textSecondary">
-                Identity: {mapIdentity(discussion.identity)}
-              </Typography>
-              <Typography color="textSecondary">
-                Create Date: {discussion.createdate}
-              </Typography>
-              <Typography>{discussion.theme}</Typography>
-            </CardContent>
-            <CardActions>
-              <Box 
-                display="flex" 
-                component="span"
-                justifyContent="space-between" 
-                alignItems="center"
-              >
-                <Button 
-                  size="Small" 
-                  color="primary" 
-                  alignItems="left"
-                >
-                  <Link
-                    href={`/discussion/${courseId}/${discussion.discussionid}`}
-                  >
-                    Enter
-                  </Link>
-                </Button>
-                <Button 
-                  size="Small" 
-                  color="primary" 
-                  alignItems="right"
-                  onClick={() => prepareDelete(discussion)}
-                >
-                  Delete
-                </Button>
-              </Box>
-            </CardActions>
-          </Card>
-        </Box>
-      </ListItem>
-    ));
-
-    discussionList = <List>{discussionItems}</List>;
-    }else{
-      const discussionItems = data.discussion.map((discussion,i) => (
+    if (data.user.identity === 1) {
+      const discussionItems = data.discussion.map((discussion, i) => (
         <ListItem key={discussion.discussionid}>
           <Box width="100%">
             <Card>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
-                  Discussion {i+1}
+                  Discussion {i + 1}
+                </Typography>
+                <Typography color="textSecondary">
+                  Create User: {discussion.name}
+                </Typography>
+                <Typography color="textSecondary">
+                  ID: {discussion.userid}
+                </Typography>
+                <Typography color="textSecondary">
+                  Identity: {mapIdentity(discussion.identity)}
+                </Typography>
+                <Typography color="textSecondary" gutterBottom>
+                  Create Date: {discussion.createdate}
+                </Typography>
+                <Typography>{discussion.theme}</Typography>
+              </CardContent>
+              <CardActions>
+                <Box
+                  display="flex"
+                  component="span"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Button size="small" color="primary">
+                    <Link
+                      href={`/discussion/${courseId}/${discussion.discussionid}`}
+                    >
+                      Enter
+                    </Link>
+                  </Button>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => prepareDelete(discussion)}
+                  >
+                    Delete
+                  </Button>
+                </Box>
+              </CardActions>
+            </Card>
+          </Box>
+        </ListItem>
+      ));
+
+      discussionList = <List>{discussionItems}</List>;
+    } else {
+      const discussionItems = data.discussion.map((discussion, i) => (
+        <ListItem key={discussion.discussionid}>
+          <Box width="100%">
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Discussion {i + 1}
                 </Typography>
                 <Typography color="textSecondary">
                   Create User: {discussion.name}
@@ -243,23 +235,19 @@ function Discussion({ courseId, courseName }) {
                 <Typography color="textSecondary">
                   Identity: {mapIdentity(discussion.identity)}
                 </Typography>
-                <Typography color="textSecondary">
+                <Typography color="textSecondary" gutterBottom>
                   Create Date: {discussion.createdate}
                 </Typography>
                 <Typography>{discussion.theme}</Typography>
               </CardContent>
               <CardActions>
-                <Box 
-                  display="flex" 
+                <Box
+                  display="flex"
                   component="span"
-                  justifyContent="space-between" 
+                  justifyContent="space-between"
                   alignItems="center"
                 >
-                  <Button 
-                    size="Small" 
-                    color="primary" 
-                    alignItems="left"
-                  >
+                  <Button size="small" color="primary">
                     <Link
                       href={`/discussion/${courseId}/${discussion.discussionid}`}
                     >
@@ -272,7 +260,7 @@ function Discussion({ courseId, courseName }) {
           </Box>
         </ListItem>
       ));
-  
+
       discussionList = <List>{discussionItems}</List>;
     }
   }
@@ -289,7 +277,9 @@ function Discussion({ courseId, courseName }) {
   } else {
     dialogContent = (
       <React.Fragment>
-        <DialogContentText>The theme of this new dicussion is: </DialogContentText>
+        <DialogContentText>
+          The theme of this new dicussion is:{" "}
+        </DialogContentText>
         <TextField
           variant="outlined"
           rows="10"
@@ -335,17 +325,20 @@ function Discussion({ courseId, courseName }) {
         >
           {discussionList}
         </Box>
-        <Box mx="10px" px="10px" pt="10px" mt="10px" 
-          display="flex" 
+        <Box
+          mx="10px"
+          px="10px"
+          pt="10px"
+          mt="10px"
+          display="flex"
           component="span"
-          justifyContent="space-between" 
+          justifyContent="space-between"
           alignItems="center"
         >
           <Button
-            size="Small"
+            size="small"
             color="primary"
-            variant="contained" 
-            alignItems="left"
+            variant="contained"
             onClick={prepareSubmission}
           >
             Create Discussion
@@ -371,29 +364,29 @@ function Discussion({ courseId, courseName }) {
         </DialogActions>
       </Dialog>
       <Dialog
-        open={d_state > D_STATE_CLOSED}
+        open={dState > D_STATE_CLOSED}
         onClose={handleDeleteClose}
         maxWidth="lg"
       >
         <DialogTitle>Deleting this discussion?</DialogTitle>
         <DialogContent>
-        <DialogContentText color="secondary">{message}</DialogContentText>
+          <DialogContentText color="secondary">{message}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
             color="primary"
-            disabled={d_state !== D_STATE_PREPARED}
+            disabled={dState !== D_STATE_PREPARED}
             onClick={performDelete}
-            alignItems="left"
           >
             Yes
           </Button>
           <Button
             color="primary"
-            disabled={d_state !== D_STATE_PREPARED}
-            onClick={()=>{window.location.reload();
-                setD_state(D_STATE_PREPARED);}}
-            alignItems="right"
+            disabled={dState !== D_STATE_PREPARED}
+            onClick={() => {
+              window.location.reload();
+              setDState(D_STATE_PREPARED);
+            }}
           >
             No
           </Button>

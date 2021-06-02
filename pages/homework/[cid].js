@@ -69,13 +69,16 @@ function Homework({ courseId, courseName }) {
   const [submissionContent, setSubmissionContent] = useState("");
 
   const C_STATE_CLOSED = 0;
-  const C_STATE_LOADING = 1;
-  const C_STATE_PREPARED = 2;
-  const C_STATE_SUBMITTING = 3;
-  const [c_state, setC_State] = useState(false);
+  const C_STATE_PREPARED = 1;
+  const C_STATE_SUBMITTING = 2;
+  const [cState, setCState] = useState(false);
   const [newHomework, setNewHomework] = useState(0);
-  const [assignDate, setAssignDate] = useState(new Date().toISOString().split("T")[0]);
-  const [dueDate, setDueDate] = useState(new Date().toISOString().split("T")[0]);
+  const [assignDate, setAssignDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [dueDate, setDueDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const prepareSubmission = (homework) => {
     if (homework.homeworkid !== currentHomework.id) {
       setCurrentHomework({
@@ -133,28 +136,25 @@ function Homework({ courseId, courseName }) {
     }
   };
 
-  const prepareHomework = () =>{
-    setC_State(C_STATE_PREPARED);
+  const prepareHomework = () => {
+    setCState(C_STATE_PREPARED);
   };
-  const performHomework = () =>{
-    setC_State(C_STATE_SUBMITTING);
+  const performHomework = () => {
+    setCState(C_STATE_SUBMITTING);
     setMessage("Processing...");
-    fetch(
-      "/api/homework?action=createHomework",
-      {
-        body: JSON.stringify({
+    fetch("/api/homework?action=createHomework", {
+      body: JSON.stringify({
         courseId: courseId,
         homeworkId: parseInt(newHomework),
         content: submissionContent,
         assign: assignDate,
         due: dueDate,
-        }), 
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-      }
-    )
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
       .then((x) => x.json())
       .then((res) => {
         if (res.ok) {
@@ -162,12 +162,12 @@ function Homework({ courseId, courseName }) {
         } else {
           setMessage(res.msg);
         }
-        setC_State(C_STATE_PREPARED);
+        setCState(C_STATE_PREPARED);
       });
   };
   const handleHomeworkClose = () => {
-    if (c_state === C_STATE_PREPARED) {
-      setC_State(C_STATE_CLOSED);
+    if (cState === C_STATE_PREPARED) {
+      setCState(C_STATE_CLOSED);
     }
   };
 
@@ -182,40 +182,7 @@ function Homework({ courseId, courseName }) {
       </Box>
     );
   } else {
-    if(data.user.identity === 0){
-    const homeworkItems = data.homework.map((homework) => (
-      <ListItem key={homework.homeworkid}>
-        <Box width="100%">
-          <Card>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Homework {homework.homeworkid}
-              </Typography>
-              <Typography color="textSecondary">
-                Assign Date: {homework.assign}
-              </Typography>
-              <Typography color="textSecondary">
-                Due Date: {homework.due}
-              </Typography>
-              <Typography>{homework.content}</Typography>
-            </CardContent>
-            <CardActions>
-              <Button
-                size="small"
-                color="primary"
-                onClick={() => prepareSubmission(homework)}
-              >
-                {homework.submitted ? "Edit Submission" : "New Submission"}
-              </Button>
-            </CardActions>
-          </Card>
-        </Box>
-      </ListItem>
-    ));
-
-    homeworkList = <List>{homeworkItems}</List>;
-    }
-    else{
+    if (data.user.identity === 0) {
       const homeworkItems = data.homework.map((homework) => (
         <ListItem key={homework.homeworkid}>
           <Box width="100%">
@@ -227,7 +194,7 @@ function Homework({ courseId, courseName }) {
                 <Typography color="textSecondary">
                   Assign Date: {homework.assign}
                 </Typography>
-                <Typography color="textSecondary">
+                <Typography color="textSecondary" gutterBottom>
                   Due Date: {homework.due}
                 </Typography>
                 <Typography>{homework.content}</Typography>
@@ -236,11 +203,38 @@ function Homework({ courseId, courseName }) {
                 <Button
                   size="small"
                   color="primary"
+                  onClick={() => prepareSubmission(homework)}
                 >
-                  <Link
-                      href={`/homework/${courseId}/${homework.homeworkid}`}
-                  >
-                  Check Submission
+                  {homework.submitted ? "Edit Submission" : "New Submission"}
+                </Button>
+              </CardActions>
+            </Card>
+          </Box>
+        </ListItem>
+      ));
+
+      homeworkList = <List>{homeworkItems}</List>;
+    } else {
+      const homeworkItems = data.homework.map((homework) => (
+        <ListItem key={homework.homeworkid}>
+          <Box width="100%">
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Homework {homework.homeworkid}
+                </Typography>
+                <Typography color="textSecondary">
+                  Assign Date: {homework.assign}
+                </Typography>
+                <Typography color="textSecondary" gutterBottom>
+                  Due Date: {homework.due}
+                </Typography>
+                <Typography>{homework.content}</Typography>
+              </CardContent>
+              <CardActions>
+                <Button size="small" color="primary">
+                  <Link href={`/homework/${courseId}/${homework.homeworkid}`}>
+                    Check Submission
                   </Link>
                 </Button>
               </CardActions>
@@ -248,7 +242,7 @@ function Homework({ courseId, courseName }) {
           </Box>
         </ListItem>
       ));
-  
+
       homeworkList = <List>{homeworkItems}</List>;
     }
   }
@@ -282,18 +276,22 @@ function Homework({ courseId, courseName }) {
     );
   }
   let createHomework;
-  if (data && data.user.identity ===1){
+  if (data && data.user.identity === 1) {
     createHomework = (
-      <Box mx="10px" px="10px" pt="10px" mt="10px" 
-        display="flex" 
+      <Box
+        mx="10px"
+        px="10px"
+        pt="10px"
+        mt="10px"
+        display="flex"
         component="span"
-        justifyContent="space-between" 
+        justifyContent="space-between"
         alignItems="center"
       >
         <Button
-          size="Small"
+          size="small"
           color="primary"
-          variant="contained" 
+          variant="contained"
           alignItems="left"
           onClick={prepareHomework}
         >
@@ -355,33 +353,32 @@ function Homework({ courseId, courseName }) {
         </DialogActions>
       </Dialog>
       <Dialog
-        open={c_state > C_STATE_CLOSED}
+        open={cState > C_STATE_CLOSED}
         onClose={handleHomeworkClose}
         maxWidth="lg"
         fullWidth
       >
         <DialogTitle>Creating homework</DialogTitle>
         <DialogContent>
-          <React.Fragment>
           <DialogContentText>Please assign new homework:</DialogContentText>
           <DialogContentText>
             <TextField
-              //variant="outlined"
               rows="1"
               placeholder="New Homework ID"
               value={newHomework}
               InputProps={{
-                inputProps: { 
-                    min: 1
-                }
+                inputProps: {
+                  min: 1,
+                },
               }}
               onChange={(e) => setNewHomework(e.target.value)}
               autoFocus
               fullWidth
               label="Homework ID"
               type="number"
+              margin="normal"
             />
-        </DialogContentText>
+          </DialogContentText>
           <TextField
             variant="outlined"
             rows="10"
@@ -391,6 +388,7 @@ function Homework({ courseId, courseName }) {
             autoFocus
             multiline
             fullWidth
+            margin="normal"
           ></TextField>
           <DialogContentText>
             <TextField
@@ -403,9 +401,10 @@ function Homework({ courseId, courseName }) {
               }}
               value={assignDate}
               onChange={(e) => setAssignDate(e.target.value)}
+              margin="normal"
             />
-        </DialogContentText>
-        <DialogContentText>
+          </DialogContentText>
+          <DialogContentText>
             <TextField
               id="dueDate"
               label="Due"
@@ -416,15 +415,15 @@ function Homework({ courseId, courseName }) {
               }}
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
+              margin="normal"
             />
-        </DialogContentText>
+          </DialogContentText>
           <DialogContentText color="secondary">{message}</DialogContentText>
-          </React.Fragment>
         </DialogContent>
         <DialogActions>
           <Button
             color="primary"
-            disabled={c_state !== C_STATE_PREPARED}
+            disabled={cState !== C_STATE_PREPARED}
             onClick={performHomework}
           >
             Create

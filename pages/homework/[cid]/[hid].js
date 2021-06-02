@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
@@ -7,23 +7,14 @@ import Link from "@material-ui/core/Link";
 import Box from "@material-ui/core/Box";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import CardActions from "@material-ui/core/CardActions";
-import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import Header from "../../../src/ui/Header";
 import useSWR from "swr";
-import Dialog from "@material-ui/core/Dialog";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogActions from "@material-ui/core/DialogActions";
-import TextField from "@material-ui/core/TextField";
 
 import { getCourseName } from "../../../src/db/courses";
 import { getHomework } from "../../../src/db/homework";
-
 
 const fetcher = (url) => fetch(url).then((r) => r.json());
 export function getStaticPaths() {
@@ -62,11 +53,7 @@ function Homework({ courseId, courseName, homeworkId }) {
     `/api/homework?action=submissionList&cid=${encodeURIComponent(courseId)}
     &hid=${encodeURIComponent(homeworkId)}`,
     fetcher
-    );
-  const mapIdentity = (identity) => {
-    if (identity === 0) {return "Student";}
-    if (identity === 1) {return "Faculty";}
-  }
+  );
   let submissionList;
   if (!data) {
     submissionList = (
@@ -78,28 +65,28 @@ function Homework({ courseId, courseName, homeworkId }) {
       </Box>
     );
   } else {
-    if (data.user.identity === 1){
-        const submissionItems = data.submissions.map((submission, i) => (
-            <ListItem key={submission}>
-              <Box width="100%">
-                <Card>
-                  <CardContent>
-                    <Typography variant="h5" gutterBottom>
-                      Submission {i+1}
-                    </Typography>
-                    <Typography color="textSecondary">
-                        Submit User: {submission.name}
-                    </Typography>
-                    <Typography color="textSecondary">
-                        ID: {submission.userid}
-                    </Typography>
-                    <Typography>{submission.content}</Typography>
-                  </CardContent>
-                </Card>
-              </Box>
-            </ListItem>
-        ));
-        submissionList = <List>{submissionItems}</List>;
+    if (data.user.identity === 1) {
+      const submissionItems = data.submissions.map((submission, i) => (
+        <ListItem key={submission}>
+          <Box width="100%">
+            <Card>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  Submission {i + 1}
+                </Typography>
+                <Typography color="textSecondary">
+                  Submit User: {submission.name}
+                </Typography>
+                <Typography color="textSecondary" gutterBottom>
+                  ID: {submission.userid}
+                </Typography>
+                <Typography>{submission.content}</Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        </ListItem>
+      ));
+      submissionList = <List>{submissionItems}</List>;
     }
   }
   return (

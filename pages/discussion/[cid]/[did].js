@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
@@ -80,45 +80,42 @@ function Discussion({ courseId, courseName, discussionId }) {
   const [message, setMessage] = useState("");
 
   const D_STATE_CLOSED = 0;
-  const D_STATE_LOADING = 1;
-  const D_STATE_PREPARED = 2;
-  const D_STATE_DELETING = 3;
-  const [d_state, setD_state] = useState(false);
+  const D_STATE_PREPARED = 1;
+  const D_STATE_DELETING = 2;
+  const [dState, setDState] = useState(false);
   const [currentContent, setCurrentContent] = useState({
     discussionid: 0,
     postid: 0,
   });
   const prepareDelete = (discussionContent) => {
-    if (discussionContent.discussionid !== currentContent.discussionid ||
-        discussionContent.postid !== currentContent.postid
-        ) {
-          setCurrentContent({
-          discussionid: discussionContent.discussionid,
-          postid: discussionContent.postid,
-        });
-        setMessage("");
-      }
-    setD_state(D_STATE_PREPARED);
+    if (
+      discussionContent.discussionid !== currentContent.discussionid ||
+      discussionContent.postid !== currentContent.postid
+    ) {
+      setCurrentContent({
+        discussionid: discussionContent.discussionid,
+        postid: discussionContent.postid,
+      });
+      setMessage("");
+    }
+    setDState(D_STATE_PREPARED);
   };
   const performDelete = () => {
-    setD_state(D_STATE_DELETING);
+    setDState(D_STATE_DELETING);
     setMessage("Processing...");
-    fetch(
-        "/api/discussion",
-        {
-          body: JSON.stringify({
-            action: "deleteContent",
-            payload: {
-              discussionId: currentContent.discussionid,
-              postId: currentContent.postid,
-            },
-          }), 
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-        }
-    )
+    fetch("/api/discussion", {
+      body: JSON.stringify({
+        action: "deleteContent",
+        payload: {
+          discussionId: currentContent.discussionid,
+          postId: currentContent.postid,
+        },
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
       .then((x) => x.json())
       .then((res) => {
         if (res.ok) {
@@ -126,38 +123,35 @@ function Discussion({ courseId, courseName, discussionId }) {
         } else {
           setMessage(res.msg);
         }
-        setD_state(D_STATE_PREPARED);
+        setDState(D_STATE_PREPARED);
       });
   };
 
   const handleDeleteClose = () => {
-    if (d_state === D_STATE_PREPARED) {
-      setD_state(D_STATE_CLOSED);
+    if (dState === D_STATE_PREPARED) {
+      setDState(D_STATE_CLOSED);
     }
   };
 
-  const prepareSubmission = () =>{
+  const prepareSubmission = () => {
     setState(STATE_PREPARED);
   };
-  const performSubmission = () =>{
+  const performSubmission = () => {
     setState(STATE_SUBMITTING);
     setMessage("Processing...");
-    fetch(
-      "/api/discussion",
-      {
-        body: JSON.stringify({
-          action: "submitContent",
-          payload: {
-            discussionId: discussionId,
-            content: submissionContent,
-          },
-        }), 
-        headers: {
-          "Content-Type": "application/json",
+    fetch("/api/discussion", {
+      body: JSON.stringify({
+        action: "submitContent",
+        payload: {
+          discussionId: discussionId,
+          content: submissionContent,
         },
-        method: "POST",
-      }
-    )
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    })
       .then((x) => x.json())
       .then((res) => {
         if (res.ok) {
@@ -174,9 +168,13 @@ function Discussion({ courseId, courseName, discussionId }) {
     }
   };
   const mapIdentity = (identity) => {
-    if (identity === 0) {return "Student";}
-    if (identity === 1) {return "Faculty";}
-  }
+    if (identity === 0) {
+      return "Student";
+    }
+    if (identity === 1) {
+      return "Faculty";
+    }
+  };
   let discussionContentList;
   if (!data) {
     discussionContentList = (
@@ -188,77 +186,80 @@ function Discussion({ courseId, courseName, discussionId }) {
       </Box>
     );
   } else {
-    if (data.user.identity === 1){
-        const discussionContentItems = data.content.map((discussionContent, i) => (
-            <ListItem key={discussionContent}>
-              <Box width="100%">
-                <Card>
-                  <CardContent>
-                    <Typography variant="h5" gutterBottom>
-                      Thread {i+1}
-                    </Typography>
-                    <Typography color="textSecondary">
-                        Create User: {discussionContent.name}
-                    </Typography>
-                    <Typography color="textSecondary">
-                        ID: {discussionContent.userid}
-                    </Typography>
-                    <Typography color="textSecondary">
-                        Identity: {mapIdentity(discussionContent.identity)}
-                    </Typography>
-                    <Typography color="textSecondary">
-                      Create Date: {discussionContent.createdate}
-                    </Typography>
-                    <Typography>{discussionContent.content}</Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Box 
-                      display="flex" 
-                      component="span"
-                      justifyContent="space-between" 
-                      alignItems="center"
+    if (data.user.identity === 1) {
+      const discussionContentItems = data.content.map(
+        (discussionContent, i) => (
+          <ListItem key={discussionContent}>
+            <Box width="100%">
+              <Card>
+                <CardContent>
+                  <Typography variant="h5" gutterBottom>
+                    Thread {i + 1}
+                  </Typography>
+                  <Typography color="textSecondary">
+                    Create User: {discussionContent.name}
+                  </Typography>
+                  <Typography color="textSecondary">
+                    ID: {discussionContent.userid}
+                  </Typography>
+                  <Typography color="textSecondary">
+                    Identity: {mapIdentity(discussionContent.identity)}
+                  </Typography>
+                  <Typography color="textSecondary" gutterBottom>
+                    Create Date: {discussionContent.createdate}
+                  </Typography>
+                  <Typography>{discussionContent.content}</Typography>
+                </CardContent>
+                <CardActions>
+                  <Box
+                    display="flex"
+                    component="span"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Button
+                      size="small"
+                      color="primary"
+                      variant="contained"
+                      onClick={() => prepareDelete(discussionContent)}
                     >
-                      <Button
-                        size="Small"
-                        color="primary"
-                        variant="contained" 
-                        alignItems="left"
-                        onClick={() => prepareDelete(discussionContent)}
-                        >
-                        Delete
-                      </Button>
-                    </Box>
-                  </CardActions>
-                </Card>
-              </Box>
-            </ListItem>
-        ));
-        discussionContentList = <List>{discussionContentItems}</List>;
-    }else{
-        const discussionContentItems = data.content.map((discussionContent,i) => (
-            <ListItem key={discussionContent}>
-              <Box width="100%">
-                <Card>
-                  <CardContent>
-                    <Typography variant="h5" gutterBottom>
-                      Thread {i+1}
-                    </Typography>
-                    <Typography color="textSecondary">
-                        Create User: {discussionContent.name}
-                    </Typography>
-                    <Typography color="textSecondary">
-                        Identity: {mapIdentity(discussionContent.identity)}
-                    </Typography>
-                    <Typography color="textSecondary">
-                      Create Date: {discussionContent.createdate}
-                    </Typography>
-                    <Typography>{discussionContent.content}</Typography>
-                  </CardContent>
-                </Card>
-              </Box>
-            </ListItem>
-        ));
-        discussionContentList = <List>{discussionContentItems}</List>;
+                      Delete
+                    </Button>
+                  </Box>
+                </CardActions>
+              </Card>
+            </Box>
+          </ListItem>
+        )
+      );
+      discussionContentList = <List>{discussionContentItems}</List>;
+    } else {
+      const discussionContentItems = data.content.map(
+        (discussionContent, i) => (
+          <ListItem key={discussionContent}>
+            <Box width="100%">
+              <Card>
+                <CardContent>
+                  <Typography variant="h5" gutterBottom>
+                    Thread {i + 1}
+                  </Typography>
+                  <Typography color="textSecondary">
+                    Create User: {discussionContent.name}
+                  </Typography>
+                  <Typography color="textSecondary">
+                    Identity: {mapIdentity(discussionContent.identity)}
+                  </Typography>
+                  <Typography color="textSecondary" gutterBottom>
+                    Create Date: {discussionContent.createdate}
+                  </Typography>
+                  <Typography>{discussionContent.content}</Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          </ListItem>
+        )
+      );
+      discussionContentList = <List>{discussionContentItems}</List>;
     }
   }
   let dialogContent;
@@ -320,17 +321,20 @@ function Discussion({ courseId, courseName, discussionId }) {
         >
           {discussionContentList}
         </Box>
-        <Box mx="10px" px="10px" pt="10px" mt="10px" 
-          display="flex" 
+        <Box
+          mx="10px"
+          px="10px"
+          pt="10px"
+          mt="10px"
+          display="flex"
           component="span"
-          justifyContent="space-between" 
+          justifyContent="space-between"
           alignItems="center"
         >
           <Button
-            size="Small"
+            size="small"
             color="primary"
-            variant="contained" 
-            alignItems="left"
+            variant="contained"
             onClick={prepareSubmission}
           >
             Create Thread
@@ -356,29 +360,29 @@ function Discussion({ courseId, courseName, discussionId }) {
         </DialogActions>
       </Dialog>
       <Dialog
-        open={d_state > D_STATE_CLOSED}
+        open={dState > D_STATE_CLOSED}
         onClose={handleDeleteClose}
         maxWidth="lg"
       >
         <DialogTitle>Deleting this thread?</DialogTitle>
         <DialogContent>
-        <DialogContentText color="secondary">{message}</DialogContentText>
+          <DialogContentText color="secondary">{message}</DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button
             color="primary"
-            disabled={d_state !== D_STATE_PREPARED}
+            disabled={dState !== D_STATE_PREPARED}
             onClick={performDelete}
-            alignItems="left"
           >
             Yes
           </Button>
           <Button
             color="primary"
-            disabled={d_state !== D_STATE_PREPARED}
-            onClick={()=>{window.location.reload();
-                setD_state(D_STATE_PREPARED);}}
-            alignItems="right"
+            disabled={dState !== D_STATE_PREPARED}
+            onClick={() => {
+              window.location.reload();
+              setDState(D_STATE_PREPARED);
+            }}
           >
             No
           </Button>

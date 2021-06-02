@@ -29,25 +29,25 @@ async function handleList(req, res) {
 }
 
 async function handleSubmissionList(req, res) {
-    const user = req.session.get("user");
-    if (!user) {
-      return {
-        ok: false,
-        msg: "Not logged in",
-        homework: [],
-      };
-    }
-  
-    const cid = Number.parseInt(req.query.cid);
-    const hid = Number.parseInt(req.query.hid);
-
-    const submissions = await getSubmissionList(cid, hid);
+  const user = req.session.get("user");
+  if (!user) {
     return {
-      ok: true,
-      user: user,
-      submissions: submissions,
+      ok: false,
+      msg: "Not logged in",
+      homework: [],
     };
   }
+
+  const cid = Number.parseInt(req.query.cid);
+  const hid = Number.parseInt(req.query.hid);
+
+  const submissions = await getSubmissionList(cid, hid);
+  return {
+    ok: true,
+    user: user,
+    submissions: submissions,
+  };
+}
 
 async function handleSubmit(req, res) {
   const user = req.session.get("user");
@@ -101,34 +101,39 @@ async function handleReview(req, res) {
 }
 
 async function handleCreateHomework(req, res) {
-    const user = req.session.get("user");
-    if (!user) {
-      return {
-        ok: false,
-        msg: "Not logged in",
-      };
-    }
-    if (parseInt(user.identity) !== 1){
-        return {
-            ok: false,
-            msg: "No privilege",
-        };
-    }
-
-    const payload = req.body;
-    const homework = await getHomework(payload.courseId, payload.homeworkId);
-    if(homework.length > 0){
-        return {
-            ok: false,
-            msg: "Homework ID already used",
-        };
-    }
-    let ok;
-    ok = await insertNewHomework(payload.courseId,payload.homeworkId, payload.content,payload.assign, payload.due);
+  const user = req.session.get("user");
+  if (!user) {
     return {
-        ok: ok,
+      ok: false,
+      msg: "Not logged in",
     };
   }
+  if (parseInt(user.identity) !== 1) {
+    return {
+      ok: false,
+      msg: "No privilege",
+    };
+  }
+
+  const payload = req.body;
+  const homework = await getHomework(payload.courseId, payload.homeworkId);
+  if (homework.length > 0) {
+    return {
+      ok: false,
+      msg: "Homework ID already used",
+    };
+  }
+  const ok = await insertNewHomework(
+    payload.courseId,
+    payload.homeworkId,
+    payload.content,
+    payload.assign,
+    payload.due
+  );
+  return {
+    ok: ok,
+  };
+}
 
 function dispatch(req) {
   if (req.query.action === "list") {
@@ -136,13 +141,16 @@ function dispatch(req) {
       return null;
     }
     return handleList;
-  }else if (req.query.action === "submissionList"){
-    if (req.method !== "GET" || typeof req.query.cid !== "string"
-    || typeof req.query.hid !== "string") {
-        return null;
+  } else if (req.query.action === "submissionList") {
+    if (
+      req.method !== "GET" ||
+      typeof req.query.cid !== "string" ||
+      typeof req.query.hid !== "string"
+    ) {
+      return null;
     }
     return handleSubmissionList;
-  }else if (req.query.action === "submit") {
+  } else if (req.query.action === "submit") {
     if (
       req.method !== "POST" ||
       typeof req.query.cid !== "string" ||
@@ -165,16 +173,17 @@ function dispatch(req) {
     return null;
   } else if (req.query.action === "score") {
     return null;
-  } else if (req.query.action === "createHomework"){
+  } else if (req.query.action === "createHomework") {
     if (
-        req.method !== "POST" ||
-        typeof req.body.courseId !== "number" ||
-        typeof req.body.homeworkId !== "number" ||
-        typeof req.body.content !== "string"
-    ) {return null;}
+      req.method !== "POST" ||
+      typeof req.body.courseId !== "number" ||
+      typeof req.body.homeworkId !== "number" ||
+      typeof req.body.content !== "string"
+    ) {
+      return null;
+    }
     return handleCreateHomework;
-  }
-  else {
+  } else {
     return null;
   }
 }

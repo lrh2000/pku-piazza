@@ -29,7 +29,7 @@ export default function Courses() {
     );
   } else {
     const courseItems = data.courses.map((course) => (
-      <React.Fragment key={course.id}>
+      <React.Fragment key={course.courseid}>
         <ListItem>
           <Grid container spacing={1}>
             <Grid item xs={12}>
@@ -37,10 +37,10 @@ export default function Courses() {
             </Grid>
             <Grid item xs={12}>
               <Box display="inline-block" width="20%">
-                <Link href={`/homework/${course.id}`}>Homework</Link>
+                <Link href={`/homework/${course.courseid}`}>Homework</Link>
               </Box>
               <Box display="inline-block" width="20%">
-                <Link href={`/discussion/${course.id}`}>Discussion</Link>
+                <Link href={`/discussion/${course.courseid}`}>Discussion</Link>
               </Box>
             </Grid>
           </Grid>
