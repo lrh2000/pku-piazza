@@ -42,25 +42,34 @@ export async function setUser(name, password, identity) {
   const calSalt = baseSalt + salt;
   const key = crypto.scryptSync(password, calSalt, 48).toString("base64");
 
-  const result = await pool.connect(async (connection) => {
-    const data = connection.query(
+  const result = await pool.transaction(async (transactionConnection) => {
+    const olddata = await transactionConnection.query(
+      sql`SELECT userid FROM Users WHERE name = ${name}`
+    );
+    if (olddata.rows.length !== 0) {
+      return "The username already exists. Try another.";
+    }
+
+    const data = await transactionConnection.query(
       sql`INSERT
-            INTO Users (userid, name, password, identity, salt)
-            VALUES (DEFAULT, ${name}, ${key}, ${identity}, ${salt})
+            INTO Users (name, password, identity, salt)
+            VALUES (${name}, ${key}, ${identity}, ${salt})
             RETURNING userid`
     );
-    return data;
+    const rows = data.rows;
+
+    if (rows.length !== 1) {
+      return null;
+    } else {
+      return {
+        userid: rows[0].userid,
+        name: name,
+        identity: identity,
+      };
+    }
   });
 
-  const rows = result.rows;
-  if (rows.length === 0) {
-    return null;
-  }
-  return {
-    userid: rows[0].userid,
-    name: name,
-    identity: identity,
-  };
+  return result;
 }
 
 export async function checkPassword(user, password) {

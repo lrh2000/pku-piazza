@@ -1,14 +1,6 @@
 import { pool } from "./common";
 import { sql } from "slonik";
 
-export async function getDiscussionList() {
-  const result = await pool.connect(async (connection) => {
-    const data = await connection.query(sql`SELECT * FROM Discussion`);
-    return data;
-  });
-  return result.rows;
-}
-
 export async function getDiscussionByCID(cid) {
   if (typeof cid !== "number") {
     return null;
@@ -19,17 +11,15 @@ export async function getDiscussionByCID(cid) {
 
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
-      sql`SELECT courseid, discussionid, userid, createdate, theme, name, identity
-            FROM Discussion JOIN Users
-            USING (userid)
+      sql`SELECT discussionid, userid, createdate, theme, name, identity
+            FROM DiscussionWithUser
             WHERE courseid = ${cid}
-            ORDER BY Discussion.discussionid DESC`
+            ORDER BY discussionid DESC`
     );
     return data;
   });
 
-  const rows = result.rows;
-  return rows;
+  return result.rows;
 }
 
 export async function getDiscussionByDID(did) {
@@ -39,19 +29,21 @@ export async function getDiscussionByDID(did) {
   if (isNaN(did)) {
     return null;
   }
+
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
-      sql`SELECT courseid, discussionid, userid, createdate, theme, name, identity
-            FROM Discussion JOIN Users
-            USING (userid)
-            WHERE discussionid = ${did}
-            ORDER BY Discussion.discussionid DESC`
+      sql`SELECT discussionid, userid, createdate, theme, name, identity
+            FROM DiscussionWithUser
+            WHERE discussionid = ${did}`
     );
     return data;
   });
 
   const rows = result.rows;
-  return rows;
+  if (rows.length !== 1) {
+    return null;
+  }
+  return rows[0];
 }
 
 export async function getDiscussionContentByDID(did) {
@@ -61,6 +53,7 @@ export async function getDiscussionContentByDID(did) {
   if (isNaN(did)) {
     return null;
   }
+
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
       sql`SELECT discussionid, postid, userid, createdate, content, name, identity
@@ -72,8 +65,7 @@ export async function getDiscussionContentByDID(did) {
     return data;
   });
 
-  const rows = result.rows;
-  return rows;
+  return result.rows;
 }
 
 export async function insertSubmissionDiscussion(cid, uid, date, theme) {
@@ -92,14 +84,15 @@ export async function insertSubmissionDiscussion(cid, uid, date, theme) {
     const data = await connection.query(
       sql`INSERT
             INTO
-              Discussion (courseid, discussionid, userid, createdate, theme)
+              Discussion (courseid, userid, createdate, theme)
             VALUES
-              (${cid}, DEFAULT, ${uid}, ${date}, ${theme})`
+              (${cid}, ${uid}, ${date}, ${theme})`
     );
     return data;
   });
   return result.rowCount === 1;
 }
+
 export async function insertSubmissionContent(did, uid, date, content) {
   if (
     typeof did !== "number" ||
@@ -116,9 +109,9 @@ export async function insertSubmissionContent(did, uid, date, content) {
     const data = await connection.query(
       sql`INSERT
             INTO
-              DiscussionContent (discussionid, postid, createdate, userid, content)
+              DiscussionContent (discussionid, createdate, userid, content)
             VALUES
-              (${did}, DEFAULT, ${date}, ${uid}, ${content})`
+              (${did}, ${date}, ${uid}, ${content})`
     );
     return data;
   });
@@ -143,7 +136,7 @@ export async function deleteDiscussionContent(did, pid) {
     );
     return data;
   });
-  return result.rowCount >= 0;
+  return result.rowCount > 0;
 }
 
 export async function deleteDiscussion(cid, did) {
@@ -157,18 +150,12 @@ export async function deleteDiscussion(cid, did) {
   }
 
   const result = await pool.connect(async (connection) => {
-    // eslint-disable-next-line no-unused-vars
     const data = await connection.query(
-      sql`DELETE
-            FROM DiscussionContent
-            WHERE discussionid = ${did}`
-    );
-    const data1 = await connection.query(
       sql`DELETE
             FROM Discussion
             WHERE discussionid = ${did} AND courseid = ${cid}`
     );
-    return data1;
+    return data;
   });
-  return result.rowCount >= 0;
+  return result.rowCount > 0;
 }

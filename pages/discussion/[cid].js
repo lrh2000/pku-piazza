@@ -99,7 +99,7 @@ function Discussion({ courseId, courseName }) {
         if (res.ok) {
           window.location.reload();
         } else {
-          setMessage(res.msg);
+          setMessage(res.msg ? res.msg : "Unknown error.");
         }
         setDState(D_STATE_PREPARED);
       });
@@ -136,7 +136,7 @@ function Discussion({ courseId, courseName }) {
         if (res.ok) {
           window.location.reload();
         } else {
-          setMessage(res.msg);
+          setMessage(res.msg ? res.msg : "Unknown error.");
         }
         setState(STATE_PREPARED);
       });

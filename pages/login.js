@@ -38,7 +38,7 @@ export default function Login() {
       window.location.href = "/courses";
     } else {
       setState({
-        message: result.msg,
+        message: result.msg ? result.msg : "Unknown error.",
         disabled: false,
       });
     }

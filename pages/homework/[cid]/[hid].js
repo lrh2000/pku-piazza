@@ -99,7 +99,7 @@ function Homework({ courseId, courseName, homeworkId }) {
     );
   } else if (data.submissions.length > 0) {
     const submissionItems = data.submissions.map((submission, i) => (
-      <ListItem key={submission}>
+      <ListItem key={submission.userid}>
         <Box width="100%">
           <Card>
             <CardContent>

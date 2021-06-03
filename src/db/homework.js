@@ -8,6 +8,7 @@ export async function getHomework(cid, hid) {
   if (isNaN(cid) || isNaN(hid)) {
     return null;
   }
+
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
       sql`SELECT *
@@ -16,7 +17,12 @@ export async function getHomework(cid, hid) {
     );
     return data;
   });
-  return result.rows;
+
+  const rows = result.rows;
+  if (rows.length !== 1) {
+    return null;
+  }
+  return rows[0];
 }
 
 export async function getHomeworkList(cid, uid) {
@@ -146,18 +152,27 @@ export async function insertNewHomework(cid, hid, content, assign, due) {
     return false;
   }
 
-  const result = await pool.connect(async (connection) => {
-    const data = await connection.query(
+  const result = await pool.transaction(async (transactionConnection) => {
+    const olddata = await transactionConnection.query(
+      sql`SELECT homeworkid
+            FROM Homework
+            WHERE courseid = ${cid} AND homeworkid = ${hid}`
+    );
+    if (olddata.rows.length !== 0) {
+      return "The homework ID already exists. Try another.";
+    }
+
+    const data = await transactionConnection.query(
       sql`INSERT
             INTO
               Homework (courseid, homeworkid, content, assign, due)
             VALUES
               (${cid}, ${hid}, ${content}, ${assign}, ${due})`
     );
-    return data;
+    return data.rowCount === 1;
   });
 
-  return result.rowCount === 1;
+  return result;
 }
 
 export async function updateSubmission(cid, hid, uid, content) {

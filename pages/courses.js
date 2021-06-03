@@ -93,7 +93,7 @@ export default function Courses() {
             if (res.ok) {
               window.location.reload();
             } else {
-              setDMessage(res.msg);
+              setDMessage(res.msg ? res.msg : "Unknown error.");
             }
             setDState(STATE_PREPARED);
           });
@@ -172,7 +172,7 @@ export default function Courses() {
             if (res.ok) {
               window.location.reload();
             } else {
-              setCMessage(res.msg);
+              setCMessage(res.msg ? res.msg : "Unknown error.");
             }
             setCState(STATE_PREPARED);
           });

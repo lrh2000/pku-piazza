@@ -42,8 +42,8 @@ export async function createCourse(name) {
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
       sql`INSERT
-            INTO Courses (courseid, name)
-            VALUES (DEFAULT, ${name})`
+            INTO Courses (name)
+            VALUES (${name})`
     );
     return data;
   });

@@ -38,19 +38,22 @@ async function handleLogout(req, res) {
 async function handleSignup(req, res) {
   const payload = req.body.payload;
 
-  const user = await getUserByName(payload.username);
-  if (user) {
-    return {
-      ok: false,
-      msg: "The username already exists. Try another.",
-    };
-  }
-
   const newuser = await setUser(
     payload.username,
     payload.password,
     parseInt(payload.identity)
   );
+
+  if (typeof newuser === "string") {
+    return {
+      ok: false,
+      msg: newuser,
+    };
+  } else if (!newuser) {
+    return {
+      ok: false,
+    };
+  }
 
   req.session.set("user", {
     id: newuser.userid,

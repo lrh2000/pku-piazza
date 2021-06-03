@@ -75,7 +75,7 @@ function Discussion({ courseId, courseName, discussionId }) {
   const STATE_PREPARED = 1;
   const STATE_SUBMITTING = 2;
   const [state, setState] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("\u200b");
 
   const D_STATE_CLOSED = 0;
   const D_STATE_PREPARED = 1;
@@ -94,7 +94,7 @@ function Discussion({ courseId, courseName, discussionId }) {
         discussionid: discussionContent.discussionid,
         postid: discussionContent.postid,
       });
-      setMessage("");
+      setMessage("\u200b");
     }
     setDState(D_STATE_PREPARED);
   };
@@ -119,7 +119,7 @@ function Discussion({ courseId, courseName, discussionId }) {
         if (res.ok) {
           window.location.reload();
         } else {
-          setMessage(res.msg);
+          setMessage(res.msg ? res.msg : "Unknown error.");
         }
         setDState(D_STATE_PREPARED);
       });
@@ -156,7 +156,7 @@ function Discussion({ courseId, courseName, discussionId }) {
         if (res.ok) {
           window.location.reload();
         } else {
-          setMessage(res.msg);
+          setMessage(res.msg ? res.msg : "Unknown error.");
         }
         setState(STATE_PREPARED);
       });
@@ -218,7 +218,7 @@ function Discussion({ courseId, courseName, discussionId }) {
     if (data.user.identity === 1) {
       const discussionContentItems = data.content.map(
         (discussionContent, i) => (
-          <ListItem key={discussionContent}>
+          <ListItem key={discussionContent.postid}>
             <Box width="100%">
               <Card>
                 <CardContent>
@@ -264,7 +264,7 @@ function Discussion({ courseId, courseName, discussionId }) {
     } else {
       const discussionContentItems = data.content.map(
         (discussionContent, i) => (
-          <ListItem key={discussionContent}>
+          <ListItem key={discussionContent.postid}>
             <Box width="100%">
               <Card>
                 <CardContent>

@@ -116,7 +116,7 @@ function Homework({ courseId, courseName }) {
         if (res.ok) {
           window.location.reload();
         } else {
-          setMessage(res.msg);
+          setMessage(res.msg ? res.msg : "Unknown error.");
         }
         setState(STATE_PREPARED);
       });
@@ -153,7 +153,7 @@ function Homework({ courseId, courseName }) {
         if (res.ok) {
           window.location.reload();
         } else {
-          setMessage(res.msg);
+          setMessage(res.msg ? res.msg : "Unknown error.");
         }
         setCState(C_STATE_PREPARED);
       });

@@ -3,7 +3,6 @@ import {
   getHomeworkList,
   getSubmission,
   getSubmissionList,
-  getHomework,
   updateSubmission,
   insertSubmission,
   insertNewHomework,
@@ -124,23 +123,28 @@ async function handleCreateHomework(req, res) {
   }
 
   const payload = req.body;
-  const homework = await getHomework(payload.courseId, payload.homeworkId);
-  if (homework.length > 0) {
-    return {
-      ok: false,
-      msg: "Homework ID already used",
-    };
-  }
-  const ok = await insertNewHomework(
+  const msg = await insertNewHomework(
     payload.courseId,
     payload.homeworkId,
     payload.content,
     payload.assign,
     payload.due
   );
-  return {
-    ok: ok,
-  };
+
+  if (typeof msg === "string") {
+    return {
+      ok: false,
+      msg: msg,
+    };
+  } else if (!msg) {
+    return {
+      ok: false,
+    };
+  } else {
+    return {
+      ok: true,
+    };
+  }
 }
 
 function dispatch(req) {
