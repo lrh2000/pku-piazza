@@ -34,7 +34,15 @@ async function handleSubmissionList(req, res) {
     return {
       ok: false,
       msg: "Not logged in",
-      homework: [],
+      submissions: [],
+    };
+  }
+  if (user.identity !== 1) {
+    return {
+      ok: false,
+      msg: "No privilege",
+      user: user,
+      submissions: [],
     };
   }
 
@@ -108,7 +116,7 @@ async function handleCreateHomework(req, res) {
       msg: "Not logged in",
     };
   }
-  if (parseInt(user.identity) !== 1) {
+  if (user.identity !== 1) {
     return {
       ok: false,
       msg: "No privilege",
@@ -178,7 +186,9 @@ function dispatch(req) {
       req.method !== "POST" ||
       typeof req.body.courseId !== "number" ||
       typeof req.body.homeworkId !== "number" ||
-      typeof req.body.content !== "string"
+      typeof req.body.content !== "string" ||
+      typeof req.body.assign !== "string" ||
+      typeof req.body.due !== "string"
     ) {
       return null;
     }

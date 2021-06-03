@@ -81,7 +81,7 @@ async function handleDeleteContent(req, res) {
       content: [],
     };
   }
-  if (parseInt(user.identity) !== 1) {
+  if (user.identity !== 1) {
     return {
       ok: false,
       msg: "No privilege",
@@ -106,7 +106,7 @@ async function handleDeleteDiscussion(req, res) {
       content: [],
     };
   }
-  if (parseInt(user.identity) !== 1) {
+  if (user.identity !== 1) {
     return {
       ok: false,
       msg: "No privilege",

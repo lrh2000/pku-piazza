@@ -145,6 +145,7 @@ export async function deleteDiscussionContent(did, pid) {
   });
   return result.rowCount >= 0;
 }
+
 export async function deleteDiscussion(cid, did) {
   if (
     typeof cid !== "number" ||

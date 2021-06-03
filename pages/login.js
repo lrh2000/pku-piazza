@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Head from "next/head";
 import Box from "@material-ui/core/Box";
 import Link from "@material-ui/core/Link";
 import TextField from "@material-ui/core/TextField";
@@ -50,6 +51,9 @@ export default function Login() {
       justifyContent="center"
       height="100vh"
     >
+      <Head>
+        <title> Login - PKU Piazza </title>
+      </Head>
       <Box
         border={1}
         borderRadius="borderRadius"
@@ -77,10 +81,25 @@ export default function Login() {
             </Grid>
             <Grid item xs={12} container spacing={2}>
               <Grid item xs={12}>
-                <TextField id="username" label="Username" fullWidth />
+                <TextField
+                  id="username"
+                  label="Username"
+                  fullWidth
+                  type="text"
+                  required
+                  inputProps={{ minLength: 5, maxLength: 30 }}
+                  autoFocus
+                />
               </Grid>
               <Grid item xs={12}>
-                <TextField id="password" label="Password" fullWidth />
+                <TextField
+                  id="password"
+                  label="Password"
+                  fullWidth
+                  type="password"
+                  required
+                  inputProps={{ minLength: 5, maxLength: 30 }}
+                />
               </Grid>
             </Grid>
             <Grid item xs={12}>

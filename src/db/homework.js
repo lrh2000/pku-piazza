@@ -30,10 +30,13 @@ export async function getHomeworkList(cid, uid) {
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
       sql`SELECT homeworkid, Homework.content, assign, due, userid
-            FROM Homework LEFT OUTER JOIN HomeworkSubmission
+            FROM Homework LEFT OUTER JOIN (
+                SELECT *
+                  FROM HomeworkSubmission
+                  WHERE userid = ${uid}
+              ) AS MySubmission
               USING (homeworkid, courseid)
             WHERE courseid = ${cid}
-              AND (userid = ${uid} OR userid IS NULL)
             ORDER BY Homework.homeworkid ASC`
     );
     return data;
@@ -135,6 +138,8 @@ export async function insertNewHomework(cid, hid, content, assign, due) {
     typeof cid !== "number" ||
     typeof hid !== "number" ||
     typeof content !== "string" ||
+    typeof assign !== "string" ||
+    typeof due !== "string" ||
     isNaN(cid) ||
     isNaN(hid)
   ) {
@@ -171,7 +176,7 @@ export async function updateSubmission(cid, hid, uid, content) {
 
   const result = await pool.connect(async (connection) => {
     const data = await connection.query(
-      sql`UPDATE Submission
+      sql`UPDATE HomeworkSubmission
             SET content = ${content}
             WHERE courseid = ${cid}
               AND homeworkid = ${hid}

@@ -1,4 +1,5 @@
 import React from "react";
+import Head from "next/head";
 import PropTypes from "prop-types";
 import AppBar from "@material-ui/core/AppBar";
 import Box from "@material-ui/core/Box";
@@ -55,6 +56,9 @@ function Header({ title, data }) {
 
   return (
     <AppBar position="static" color="transparent">
+      <Head>
+        <title> {title} - PKU Piazza </title>
+      </Head>
       <Toolbar>
         <Grid container alignItems="center">
           <Grid item xs={4}>

@@ -18,6 +18,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogActions from "@material-ui/core/DialogActions";
 import TextField from "@material-ui/core/TextField";
+import Grid from "@material-ui/core/Grid";
 import useSWR from "swr";
 import Header from "../../src/ui/Header";
 
@@ -50,10 +51,7 @@ export async function getStaticProps(context) {
 }
 
 function Homework({ courseId, courseName }) {
-  const { data } = useSWR(
-    `/api/homework?action=list&cid=${encodeURIComponent(courseId)}`,
-    fetcher
-  );
+  const { data } = useSWR(`/api/homework?action=list&cid=${courseId}`, fetcher);
 
   const STATE_CLOSED = 0;
   const STATE_LOADING = 1;
@@ -72,13 +70,6 @@ function Homework({ courseId, courseName }) {
   const C_STATE_PREPARED = 1;
   const C_STATE_SUBMITTING = 2;
   const [cState, setCState] = useState(false);
-  const [newHomework, setNewHomework] = useState(0);
-  const [assignDate, setAssignDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
-  const [dueDate, setDueDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
   const prepareSubmission = (homework) => {
     if (homework.homeworkid !== currentHomework.id) {
       setCurrentHomework({
@@ -90,8 +81,8 @@ function Homework({ courseId, courseName }) {
         setState(STATE_LOADING);
         fetch(
           "/api/homework?action=review" +
-            `&cid=${encodeURIComponent(courseId)}` +
-            `&hid=${encodeURIComponent(homework.homeworkid)}`
+            `&cid=${courseId}` +
+            `&hid=${homework.homeworkid}`
         )
           .then((x) => x.json())
           .then((res) => {
@@ -107,15 +98,16 @@ function Homework({ courseId, courseName }) {
     }
   };
 
-  const performSubmission = () => {
+  const performSubmission = (event) => {
+    event.preventDefault();
     setState(STATE_SUBMITTING);
     setMessage("Processing...");
     fetch(
       "/api/homework?action=submit" +
-        `&cid=${encodeURIComponent(courseId)}` +
-        `&hid=${encodeURIComponent(currentHomework.id)}`,
+        `&cid=${courseId}` +
+        `&hid=${currentHomework.id}`,
       {
-        body: submissionContent,
+        body: event.target.content.value,
         method: "POST",
       }
     )
@@ -139,16 +131,17 @@ function Homework({ courseId, courseName }) {
   const prepareHomework = () => {
     setCState(C_STATE_PREPARED);
   };
-  const performHomework = () => {
+  const performHomework = (event) => {
+    event.preventDefault();
     setCState(C_STATE_SUBMITTING);
     setMessage("Processing...");
     fetch("/api/homework?action=createHomework", {
       body: JSON.stringify({
         courseId: courseId,
-        homeworkId: parseInt(newHomework),
-        content: submissionContent,
-        assign: assignDate,
-        due: dueDate,
+        homeworkId: parseInt(event.target.hid.value),
+        content: event.target.content.value,
+        assign: event.target.assign.value,
+        due: event.target.due.value,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -178,6 +171,60 @@ function Homework({ courseId, courseName }) {
         <CircularProgress />
         <Box mt="10px">
           <Typography variant="h5"> Loading... </Typography>
+        </Box>
+      </Box>
+    );
+  } else if (
+    data.homework.length === 0 &&
+    data.user &&
+    data.user.identity === 1
+  ) {
+    homeworkList = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <Box mt="10px">
+          <Typography
+            variant="h5"
+            color="textSecondary"
+            align="center"
+            gutterBottom
+          >
+            {" "}
+            No assignments yet.{" "}
+          </Typography>
+          <Typography variant="h5" color="textSecondary" align="center">
+            {" "}
+            But you can{" "}
+            <Link
+              onClick={(e) => {
+                e.preventDefault();
+                prepareHomework();
+              }}
+              href="#"
+            >
+              create one
+            </Link>
+            .{" "}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  } else if (data.homework.length === 0) {
+    homeworkList = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <Box mt="10px">
+          <Typography
+            variant="h5"
+            color="textSecondary"
+            align="center"
+            gutterBottom
+          >
+            {" "}
+            Congratulations!{" "}
+          </Typography>
+          <Typography variant="h5" color="textSecondary" align="center">
+            {" "}
+            No assignments yet.{" "}
+          </Typography>
         </Box>
       </Box>
     );
@@ -267,16 +314,18 @@ function Homework({ courseId, courseName }) {
           placeholder="Writing your submission here..."
           value={submissionContent}
           onChange={(e) => setSubmissionContent(e.target.value)}
+          name="content"
           autoFocus
           multiline
           fullWidth
+          required
         ></TextField>
         <DialogContentText color="secondary">{message}</DialogContentText>
       </React.Fragment>
     );
   }
   let createHomework;
-  if (data && data.user.identity === 1) {
+  if (data && data.user && data.user.identity === 1) {
     createHomework = (
       <Box
         mx="10px"
@@ -292,7 +341,6 @@ function Homework({ courseId, courseName }) {
           size="small"
           color="primary"
           variant="contained"
-          alignItems="left"
           onClick={prepareHomework}
         >
           Add Homework
@@ -341,16 +389,18 @@ function Homework({ courseId, courseName }) {
         fullWidth
       >
         <DialogTitle>Submitting homework {currentHomework.id}</DialogTitle>
-        <DialogContent>{dialogContent}</DialogContent>
-        <DialogActions>
-          <Button
-            color="primary"
-            disabled={state !== STATE_PREPARED}
-            onClick={performSubmission}
-          >
-            Submit
-          </Button>
-        </DialogActions>
+        <form onSubmit={performSubmission}>
+          <DialogContent>{dialogContent}</DialogContent>
+          <DialogActions>
+            <Button
+              color="primary"
+              disabled={state !== STATE_PREPARED}
+              type="submit"
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
       <Dialog
         open={cState > C_STATE_CLOSED}
@@ -359,76 +409,73 @@ function Homework({ courseId, courseName }) {
         fullWidth
       >
         <DialogTitle>Creating homework</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Please assign new homework:</DialogContentText>
-          <DialogContentText>
+        <form onSubmit={performHomework}>
+          <DialogContent>
+            <DialogContentText>Please assign new homework:</DialogContentText>
             <TextField
-              rows="1"
               placeholder="New Homework ID"
-              value={newHomework}
-              InputProps={{
-                inputProps: {
-                  min: 1,
-                },
-              }}
-              onChange={(e) => setNewHomework(e.target.value)}
-              autoFocus
-              fullWidth
+              inputProps={{ min: 1 }}
+              name="hid"
               label="Homework ID"
               type="number"
-              margin="normal"
+              defaultValue={1}
+              required
             />
-          </DialogContentText>
-          <TextField
-            variant="outlined"
-            rows="10"
-            placeholder="Assign your homework here..."
-            value={submissionContent}
-            onChange={(e) => setSubmissionContent(e.target.value)}
-            autoFocus
-            multiline
-            fullWidth
-            margin="normal"
-          ></TextField>
-          <DialogContentText>
             <TextField
-              id="assignDate"
-              label="Assign"
-              type="date"
-              defaultValue={new Date().toISOString().split("T")[0]}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              value={assignDate}
-              onChange={(e) => setAssignDate(e.target.value)}
+              variant="outlined"
+              rows="10"
+              placeholder="Assign your homework here..."
+              value={submissionContent}
+              onChange={(e) => setSubmissionContent(e.target.value)}
+              name="content"
+              autoFocus
+              multiline
+              fullWidth
               margin="normal"
-            />
-          </DialogContentText>
-          <DialogContentText>
-            <TextField
-              id="dueDate"
-              label="Due"
-              type="date"
-              defaultValue={new Date().toISOString().split("T")[0]}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              margin="normal"
-            />
-          </DialogContentText>
-          <DialogContentText color="secondary">{message}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            color="primary"
-            disabled={cState !== C_STATE_PREPARED}
-            onClick={performHomework}
-          >
-            Create
-          </Button>
-        </DialogActions>
+              required
+            ></TextField>
+            <Grid container>
+              <Grid item xs={6}>
+                <TextField
+                  id="assignDate"
+                  label="Assign"
+                  type="date"
+                  defaultValue={new Date().toISOString().split("T")[0]}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  name="assign"
+                  margin="normal"
+                  required
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  id="dueDate"
+                  label="Due"
+                  type="date"
+                  defaultValue={new Date().toISOString().split("T")[0]}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  name="due"
+                  margin="normal"
+                  required
+                />
+              </Grid>
+            </Grid>
+            <DialogContentText color="secondary">{message}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              color="primary"
+              disabled={cState !== C_STATE_PREPARED}
+              type="submit"
+            >
+              Create
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </div>
   );

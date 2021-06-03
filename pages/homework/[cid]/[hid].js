@@ -50,8 +50,9 @@ export async function getStaticProps(context) {
 
 function Homework({ courseId, courseName, homeworkId }) {
   const { data } = useSWR(
-    `/api/homework?action=submissionList&cid=${encodeURIComponent(courseId)}
-    &hid=${encodeURIComponent(homeworkId)}`,
+    "/api/homework?action=submissionList" +
+      `&cid=${courseId}` +
+      `&hid=${homeworkId}`,
     fetcher
   );
   let submissionList;
@@ -64,34 +65,70 @@ function Homework({ courseId, courseName, homeworkId }) {
         </Box>
       </Box>
     );
+  } else if (
+    data.submissions.length === 0 &&
+    data.user &&
+    data.user.identity === 1
+  ) {
+    submissionList = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <Box mt="10px">
+          <Typography
+            variant="h5"
+            color="textSecondary"
+            align="center"
+            gutterBottom
+          >
+            {" "}
+            No submissions yet.{" "}
+          </Typography>
+          <Typography variant="h5" color="textSecondary" align="center">
+            <Link
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.back();
+              }}
+              href="#"
+            >
+              Go back
+            </Link>{" "}
+            to the previous page.{" "}
+          </Typography>
+        </Box>
+      </Box>
+    );
+  } else if (data.submissions.length > 0) {
+    const submissionItems = data.submissions.map((submission, i) => (
+      <ListItem key={submission}>
+        <Box width="100%">
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Submission {i + 1}
+              </Typography>
+              <Typography color="textSecondary">
+                Submit User: {submission.name}
+              </Typography>
+              <Typography color="textSecondary" gutterBottom>
+                ID: {submission.userid}
+              </Typography>
+              <Typography>{submission.content}</Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      </ListItem>
+    ));
+    submissionList = <List>{submissionItems}</List>;
   } else {
-    if (data.user.identity === 1) {
-      const submissionItems = data.submissions.map((submission, i) => (
-        <ListItem key={submission}>
-          <Box width="100%">
-            <Card>
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  Submission {i + 1}
-                </Typography>
-                <Typography color="textSecondary">
-                  Submit User: {submission.name}
-                </Typography>
-                <Typography color="textSecondary" gutterBottom>
-                  ID: {submission.userid}
-                </Typography>
-                <Typography>{submission.content}</Typography>
-              </CardContent>
-            </Card>
-          </Box>
-        </ListItem>
-      ));
-      submissionList = <List>{submissionItems}</List>;
+    submissionList = null;
+    if (data.user) {
+      window.location.href = "/courses";
     }
   }
+
   return (
     <div>
-      <Header title={`${courseName}: Homework`} data={data} />
+      <Header title={`${courseName}: Submissions`} data={data} />
       <Container>
         <Box mx="10px" px="10px" pt="10px" mt="10px">
           <Breadcrumbs separator=">" aria-label="breadcrumb">
@@ -102,12 +139,12 @@ function Homework({ courseId, courseName, homeworkId }) {
             <Breadcrumbs separator=":" aria-label="breadcrumb">
               <Typography color="textPrimary">{courseName}</Typography>
               <Breadcrumbs separator="/" aria-label="breadcrumb">
-                <Link color="inherit" href={`/discussion/${courseId}`}>
-                  Discussion
+                <Link color="inherit" href={`/homework/${courseId}`}>
+                  Homework
                 </Link>
-                <Typography color="textPrimary">Homework</Typography>
               </Breadcrumbs>
             </Breadcrumbs>
+            <Typography color="textPrimary">Submissions</Typography>
           </Breadcrumbs>
         </Box>
         <Box

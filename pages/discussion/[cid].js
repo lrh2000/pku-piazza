@@ -52,11 +52,9 @@ function Discussion({ courseId, courseName }) {
   const { data } = useSWR(`/api/discussion/${courseId}`, fetcher);
 
   const STATE_CLOSED = 0;
-  const STATE_LOADING = 1;
-  const STATE_PREPARED = 2;
-  const STATE_SUBMITTING = 3;
+  const STATE_PREPARED = 1;
+  const STATE_SUBMITTING = 2;
   const [state, setState] = useState(false);
-  const [submissionContent, setSubmissionContent] = useState("");
   const [message, setMessage] = useState("\u200b");
 
   const D_STATE_CLOSED = 0;
@@ -105,8 +103,6 @@ function Discussion({ courseId, courseName }) {
         }
         setDState(D_STATE_PREPARED);
       });
-    window.location.reload();
-    setDState(D_STATE_PREPARED);
   };
 
   const handleDeleteClose = () => {
@@ -118,7 +114,8 @@ function Discussion({ courseId, courseName }) {
   const prepareSubmission = () => {
     setState(STATE_PREPARED);
   };
-  const performSubmission = () => {
+  const performSubmission = (event) => {
+    event.preventDefault();
     setState(STATE_SUBMITTING);
     setMessage("Processing...");
     fetch("/api/discussion", {
@@ -126,7 +123,7 @@ function Discussion({ courseId, courseName }) {
         action: "submitDiscussion",
         payload: {
           courseId: courseId,
-          theme: submissionContent,
+          theme: event.target.content.value,
         },
       }),
       headers: {
@@ -164,6 +161,36 @@ function Discussion({ courseId, courseName }) {
         <CircularProgress />
         <Box mt="10px">
           <Typography variant="h5"> Loading... </Typography>
+        </Box>
+      </Box>
+    );
+  } else if (data.discussion.length === 0) {
+    discussionList = (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <Box mt="10px">
+          <Typography
+            variant="h5"
+            color="textSecondary"
+            align="center"
+            gutterBottom
+          >
+            {" "}
+            No discussions yet.{" "}
+          </Typography>
+          <Typography variant="h5" color="textSecondary" align="center">
+            {" "}
+            But you can{" "}
+            <Link
+              onClick={(e) => {
+                e.preventDefault();
+                prepareSubmission();
+              }}
+              href="#"
+            >
+              create one
+            </Link>
+            .{" "}
+          </Typography>
         </Box>
       </Box>
     );
@@ -264,36 +291,7 @@ function Discussion({ courseId, courseName }) {
       discussionList = <List>{discussionItems}</List>;
     }
   }
-  let dialogContent;
-  if (state === STATE_LOADING) {
-    dialogContent = (
-      <Box display="flex" flexDirection="column" alignItems="center">
-        <CircularProgress />
-        <Box mt="10px">
-          <Typography variant="h5"> Loading... </Typography>
-        </Box>
-      </Box>
-    );
-  } else {
-    dialogContent = (
-      <React.Fragment>
-        <DialogContentText>
-          The theme of this new dicussion is:{" "}
-        </DialogContentText>
-        <TextField
-          variant="outlined"
-          rows="10"
-          placeholder="Writing your theme here..."
-          value={submissionContent}
-          onChange={(e) => setSubmissionContent(e.target.value)}
-          autoFocus
-          multiline
-          fullWidth
-        ></TextField>
-        <DialogContentText color="secondary">{message}</DialogContentText>
-      </React.Fragment>
-    );
-  }
+
   return (
     <div>
       <Header title={`${courseName}: Discussion`} data={data} />
@@ -352,16 +350,33 @@ function Discussion({ courseId, courseName }) {
         fullWidth
       >
         <DialogTitle>Creating discussion</DialogTitle>
-        <DialogContent>{dialogContent}</DialogContent>
-        <DialogActions>
-          <Button
-            color="primary"
-            disabled={state !== STATE_PREPARED}
-            onClick={performSubmission}
-          >
-            Submit
-          </Button>
-        </DialogActions>
+        <form onSubmit={performSubmission}>
+          <DialogContent>
+            <DialogContentText>
+              The theme of this new dicussion is:{" "}
+            </DialogContentText>
+            <TextField
+              variant="outlined"
+              rows="10"
+              placeholder="Writing your theme here..."
+              name="content"
+              autoFocus
+              multiline
+              fullWidth
+              required
+            ></TextField>
+            <DialogContentText color="secondary">{message}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              color="primary"
+              disabled={state !== STATE_PREPARED}
+              type="submit"
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
       <Dialog
         open={dState > D_STATE_CLOSED}
@@ -383,10 +398,7 @@ function Discussion({ courseId, courseName }) {
           <Button
             color="primary"
             disabled={dState !== D_STATE_PREPARED}
-            onClick={() => {
-              window.location.reload();
-              setDState(D_STATE_PREPARED);
-            }}
+            onClick={handleDeleteClose}
           >
             No
           </Button>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Head from "next/head";
 import Box from "@material-ui/core/Box";
 import Link from "@material-ui/core/Link";
 import TextField from "@material-ui/core/TextField";
@@ -7,7 +8,6 @@ import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
-import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
@@ -61,6 +61,9 @@ export default function Login() {
       justifyContent="center"
       height="100vh"
     >
+      <Head>
+        <title> Signup - PKU Piazza </title>
+      </Head>
       <Box
         border={1}
         borderRadius="borderRadius"
@@ -88,10 +91,25 @@ export default function Login() {
             </Grid>
             <Grid item xs={12} container spacing={2}>
               <Grid item xs={12}>
-                <TextField id="username" label="Username" fullWidth />
+                <TextField
+                  id="username"
+                  label="Username"
+                  fullWidth
+                  type="text"
+                  required
+                  inputProps={{ minLength: 5, maxLength: 30 }}
+                  autoFocus
+                />
               </Grid>
               <Grid item xs={12}>
-                <TextField id="password" label="Password" fullWidth />
+                <TextField
+                  id="password"
+                  label="Password"
+                  fullWidth
+                  type="password"
+                  required
+                  inputProps={{ minLength: 5, maxLength: 30 }}
+                />
               </Grid>
               <Grid item xs={6}>
                 <FormControl required fullWidth>
@@ -106,7 +124,6 @@ export default function Login() {
                     <MenuItem value={0}>Student</MenuItem>
                     <MenuItem value={1}>Faculty</MenuItem>
                   </Select>
-                  <FormHelperText>Required</FormHelperText>
                 </FormControl>
               </Grid>
               <Grid item xs={6}></Grid>

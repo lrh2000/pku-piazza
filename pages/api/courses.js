@@ -1,17 +1,89 @@
-import { getCourseList } from "../../src/db/courses";
+import {
+  getCourseList,
+  createCourse,
+  destroyCourse,
+} from "../../src/db/courses";
+
 import { withSession } from "../../src/session";
 
-export default withSession(async (req, res) => {
+async function handleList(req) {
   const user = req.session.get("user");
   if (!user) {
-    res.status(200).json({
+    return {
+      ok: false,
+      msg: "Not logged in",
       courses: [],
-    });
+    };
+  }
+
+  const list = await getCourseList();
+  return {
+    ok: true,
+    courses: list,
+    user: user,
+  };
+}
+
+async function handleCreate(req) {
+  const user = req.session.get("user");
+  if (!user) {
+    return {
+      ok: false,
+      msg: "Not logged in",
+    };
+  }
+  if (user.identity !== 1) {
+    return {
+      ok: false,
+      msg: "No privilege",
+    };
+  }
+  const ok = await createCourse(req.body.name);
+  return { ok: ok };
+}
+
+async function handleDestroy(req) {
+  const user = req.session.get("user");
+  if (!user) {
+    return {
+      ok: false,
+      msg: "Not logged in",
+    };
+  }
+  if (user.identity !== 1) {
+    return {
+      ok: false,
+      msg: "No privilege",
+    };
+  }
+  const ok = await destroyCourse(req.body.cid);
+  return { ok: ok };
+}
+
+function dispatch(req) {
+  if (req.method === "GET") {
+    return handleList;
+  } else if (req.method === "POST") {
+    if (req.body.action === "create" && typeof req.body.name === "string") {
+      return handleCreate;
+    } else if (
+      req.body.action === "destroy" &&
+      typeof req.body.cid === "number"
+    ) {
+      return handleDestroy;
+    } else {
+      return null;
+    }
   } else {
-    const courses = await getCourseList();
-    res.status(200).json({
-      user: user,
-      courses: courses,
-    });
+    return null;
+  }
+}
+
+export default withSession(async (req, res) => {
+  const handler = dispatch(req);
+  if (!handler) {
+    res.status(400).json({ ok: false, msg: "Invalid arguments" });
+  } else {
+    res.status(200).json(await handler(req));
   }
 });
