@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { pool } from "./common";
-import { sql } from "slonik";
+import { sql, UniqueIntegrityConstraintViolationError } from "slonik";
 
 const baseSalt = "TxxDr5w30ikByJFL";
 
@@ -42,22 +42,25 @@ export async function setUser(name, password, identity) {
   const calSalt = baseSalt + salt;
   const key = crypto.scryptSync(password, calSalt, 48).toString("base64");
 
-  const result = await pool.transaction(async (transactionConnection) => {
-    const olddata = await transactionConnection.query(
-      sql`SELECT userid FROM Users WHERE name = ${name}`
-    );
-    if (olddata.rows.length !== 0) {
-      return "The username already exists. Try another.";
+  const result = await pool.connect(async (connection) => {
+    let data;
+
+    try {
+      data = await connection.query(
+        sql`INSERT
+              INTO Users (name, password, identity, salt)
+              VALUES (${name}, ${key}, ${identity}, ${salt})
+              RETURNING userid`
+      );
+    } catch (error) {
+      if (error instanceof UniqueIntegrityConstraintViolationError) {
+        return "The username already exists. Try another.";
+      } else {
+        throw error;
+      }
     }
 
-    const data = await transactionConnection.query(
-      sql`INSERT
-            INTO Users (name, password, identity, salt)
-            VALUES (${name}, ${key}, ${identity}, ${salt})
-            RETURNING userid`
-    );
     const rows = data.rows;
-
     if (rows.length !== 1) {
       return null;
     } else {

@@ -38,8 +38,22 @@ async function handleCreate(req) {
       msg: "No privilege",
     };
   }
-  const ok = await createCourse(req.body.name);
-  return { ok: ok };
+
+  const msg = await createCourse(req.body.name);
+  if (typeof msg === "string") {
+    return {
+      ok: false,
+      msg: msg,
+    };
+  } else if (!msg) {
+    return {
+      ok: false,
+    };
+  } else {
+    return {
+      ok: true,
+    };
+  }
 }
 
 async function handleDestroy(req) {
@@ -56,6 +70,7 @@ async function handleDestroy(req) {
       msg: "No privilege",
     };
   }
+
   const ok = await destroyCourse(req.body.cid);
   return { ok: ok };
 }

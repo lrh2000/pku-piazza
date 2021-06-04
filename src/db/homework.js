@@ -1,5 +1,5 @@
 import { pool } from "./common";
-import { sql } from "slonik";
+import { sql, UniqueIntegrityConstraintViolationError } from "slonik";
 
 export async function getHomework(cid, hid) {
   if (typeof cid !== "number" || typeof hid !== "number") {
@@ -152,23 +152,25 @@ export async function insertNewHomework(cid, hid, content, assign, due) {
     return false;
   }
 
-  const result = await pool.transaction(async (transactionConnection) => {
-    const olddata = await transactionConnection.query(
-      sql`SELECT homeworkid
-            FROM Homework
-            WHERE courseid = ${cid} AND homeworkid = ${hid}`
-    );
-    if (olddata.rows.length !== 0) {
-      return "The homework ID already exists. Try another.";
+  const result = await pool.connect(async (connection) => {
+    let data;
+
+    try {
+      data = await connection.query(
+        sql`INSERT
+              INTO
+                Homework (courseid, homeworkid, content, assign, due)
+              VALUES
+                (${cid}, ${hid}, ${content}, ${assign}, ${due})`
+      );
+    } catch (error) {
+      if (error instanceof UniqueIntegrityConstraintViolationError) {
+        return "The homework ID already exists. Try another.";
+      } else {
+        throw error;
+      }
     }
 
-    const data = await transactionConnection.query(
-      sql`INSERT
-            INTO
-              Homework (courseid, homeworkid, content, assign, due)
-            VALUES
-              (${cid}, ${hid}, ${content}, ${assign}, ${due})`
-    );
     return data.rowCount === 1;
   });
 

@@ -1,5 +1,5 @@
 import { pool } from "./common";
-import { sql } from "slonik";
+import { sql, UniqueIntegrityConstraintViolationError } from "slonik";
 
 export async function getCourseList() {
   const result = await pool.connect(async (connection) => {
@@ -40,15 +40,26 @@ export async function createCourse(name) {
   }
 
   const result = await pool.connect(async (connection) => {
-    const data = await connection.query(
-      sql`INSERT
-            INTO Courses (name)
-            VALUES (${name})`
-    );
-    return data;
+    let data;
+
+    try {
+      data = await connection.query(
+        sql`INSERT
+              INTO Courses (name)
+              VALUES (${name})`
+      );
+    } catch (error) {
+      if (error instanceof UniqueIntegrityConstraintViolationError) {
+        return "The course name already exists. Try another.";
+      } else {
+        throw error;
+      }
+    }
+
+    return data.rowCount === 1;
   });
 
-  return result.rowCount === 1;
+  return result;
 }
 
 export async function destroyCourse(cid) {
