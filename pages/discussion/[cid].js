@@ -85,7 +85,7 @@ function Discussion({ courseId, courseName }) {
       body: JSON.stringify({
         action: "deleteDiscussion",
         payload: {
-          courseId: currentDiscussion.courseid,
+          courseId: courseId,
           discussionId: currentDiscussion.discussionid,
         },
       }),
